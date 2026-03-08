@@ -41,12 +41,33 @@ export function useTodayState() {
     ((habits.length / HABITS.length) * 100 + (journal ? 100 : 0)) / 2
   );
 
+  // Streak — count consecutive days with at least 1 habit logged
+  const streakDays = (() => {
+    if (!loaded) return 0;
+    let count = 0;
+    const today = new Date();
+    for (let i = 1; i <= 365; i++) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = STORAGE_KEYS.dailyState(d.toISOString().split('T')[0]);
+      const saved = loadLocal(key, null);
+      if (saved?.habits?.length > 0) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    if (habits.length > 0) count++;
+    return count;
+  })();
+
   return {
     habits,
     journal,
     captures,
     loaded,
     momentumScore,
+    streakDays,
     toggleHabit,
     setJournal,
     addCapture,

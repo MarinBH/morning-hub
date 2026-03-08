@@ -3,7 +3,7 @@ import { colors, spacing, fonts } from '../../lib/theme';
 import { getGreeting } from '../../lib/utils';
 import MomentumRing from '../common/MomentumRing';
 
-export default function Header({ momentumScore = 0, captureCount = 0 }) {
+export default function Header({ momentumScore = 0, captureCount = 0, streakDays = 0, onSearchClick }) {
   return (
     <div
       style={{
@@ -25,11 +25,44 @@ export default function Header({ momentumScore = 0, captureCount = 0 }) {
         >
           {getGreeting()}
         </div>
-        <div style={{ fontSize: 12, color: colors.textFaint, marginTop: 2 }}>
-          Command Center
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+          <span style={{ fontSize: 12, color: colors.textFaint }}>Command Center</span>
+          {streakDays > 0 && (
+            <span style={{
+              fontSize: 11,
+              color: colors.orange,
+              background: 'rgba(255,184,108,0.1)',
+              padding: '1px 6px',
+              borderRadius: 100,
+              fontWeight: 600,
+            }}>
+              {streakDays}d streak
+            </span>
+          )}
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.md }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+        {/* Search trigger */}
+        <button
+          onClick={onSearchClick}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            border: `1px solid ${colors.borderActive}`,
+            background: 'transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            color: colors.textDim,
+            transition: 'background 0.2s',
+          }}
+          aria-label="Search"
+        >
+          {'\u{1F50D}'}
+        </button>
         {captureCount > 0 && (
           <div
             style={{
@@ -40,7 +73,7 @@ export default function Header({ momentumScore = 0, captureCount = 0 }) {
               color: colors.primary,
             }}
           >
-            {captureCount} captured
+            {captureCount}
           </div>
         )}
         <MomentumRing score={momentumScore} size={40} strokeWidth={2.5} />

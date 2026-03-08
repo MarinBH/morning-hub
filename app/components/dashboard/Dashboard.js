@@ -11,11 +11,12 @@ import Card from '../common/Card';
 import ProgressBar from '../common/ProgressBar';
 import Badge from '../common/Badge';
 import WheelOfLife from '../common/WheelOfLife';
+import Skeleton, { SkeletonCard } from '../common/Skeleton';
 import HabitList from '../practice/HabitList';
 import BreathworkSection from '../practice/BreathworkSection';
 import JournalEntry from '../practice/JournalEntry';
 
-export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate }) {
+export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit }) {
   const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
   const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
   const [practiceOpen, setPracticeOpen] = useState(true);
@@ -106,6 +107,40 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
             </span>
           </div>
         )}
+
+        {/* Start my day button */}
+        {!committed && !loadingTasks && highPriorityTasks.length > 0 && (
+          <button
+            onClick={onCommit}
+            style={{
+              width: '100%',
+              marginTop: spacing.md,
+              padding: `${spacing.md}px`,
+              borderRadius: radius.sm,
+              border: 'none',
+              background: colors.gradient,
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              letterSpacing: 0.5,
+              transition: 'opacity 0.2s',
+            }}
+          >
+            {'\u26A1'} Start my day
+          </button>
+        )}
+        {committed && (
+          <div style={{
+            marginTop: spacing.md,
+            padding: `${spacing.sm}px`,
+            textAlign: 'center',
+            fontSize: 13,
+            color: colors.success,
+          }}>
+            {'\u2713'} Locked in &mdash; let&apos;s go
+          </div>
+        )}
       </div>
 
       {/* Morning Practice */}
@@ -144,7 +179,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         style={{ marginBottom: spacing.lg }}
       >
         {loadingTasks ? (
-          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>Loading...</div>
+          <SkeletonCard lines={3} />
         ) : errorTasks ? (
           <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>Could not load tasks</div>
         ) : previewTasks.length > 0 ? (
@@ -178,7 +213,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         style={{ marginBottom: spacing.lg }}
       >
         {loadingEvents ? (
-          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>Loading...</div>
+          <SkeletonCard lines={2} />
         ) : errorEvents ? (
           <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>Could not load calendar</div>
         ) : events.length > 0 ? (

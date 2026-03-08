@@ -1,0 +1,380 @@
+'use client';
+import { useState, useEffect } from 'react';
+import { colors, radius, spacing, typography, fonts } from '../../lib/theme';
+import { getDateString, fmtTime, loadLocal } from '../../lib/utils';
+import { filterSystemTasks, isTaskOverdue } from '../../lib/utils';
+import { HABITS, getPrompt, PRIORITY_COLORS, STORAGE_KEYS, API } from '../../lib/constants';
+import Card from '../common/Card';
+import ProgressBar from '../common/ProgressBar';
+import Badge from '../common/Badge';
+import WheelOfLife from '../common/WheelOfLife';
+import BreathTimer from '../practice/BreathTimer';
+
+export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate }) {
+  const [events, setEvents] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [errorEvents, setErrorEvents] = useState(null);
+  const [errorTasks, setErrorTasks] = useState(null);
+  const [practiceOpen, setPracticeOpen] = useState(true);
+  const [breathOpen, setBreathOpen] = useState(false);
+
+  // Fetch calendar events
+  useEffect(() => {
+    fetch(API.calendar)
+      .then((r) => r.json())
+      .then((d) => { setEvents(d.events || []); setLoadingEvents(false); })
+      .catch((err) => { setErrorEvents(err.message); setLoadingEvents(false); });
+  }, []);
+
+  // Fetch tasks
+  useEffect(() => {
+    fetch(API.todoistTasks)
+      .then((r) => r.json())
+      .then((d) => {
+        const filtered = filterSystemTasks(d.results || []);
+        setTasks(filtered.sort((a, b) => b.priority - a.priority).slice(0, 5));
+        setLoadingTasks(false);
+      })
+      .catch((err) => { setErrorTasks(err.message); setLoadingTasks(false); });
+  }, []);
+
+  const completedHabits = habits.length;
+  const totalHabits = HABITS.length;
+  const habitProgress = (completedHabits / totalHabits) * 100;
+  const prompt = getPrompt();
+
+  const nextEvent = events[0];
+  const highPriorityTasks = tasks.filter((t) => t.priority >= 3);
+
+  return (
+    <div style={{ padding: `0 ${spacing.xl}px 100px` }}>
+      {/* Date & Greeting */}
+      <div style={{ marginBottom: spacing.xxl }}>
+        <div style={typography.label}>{getDateString().toUpperCase()}</div>
+      </div>
+
+      {/* AI Briefing Card */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, rgba(108,155,255,0.08), rgba(139,108,255,0.08))',
+          borderRadius: radius.md,
+          padding: `${spacing.xl}px`,
+          marginBottom: spacing.lg,
+          border: '1px solid rgba(108,155,255,0.12)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.md }}>
+          <span style={{ fontSize: 16 }}>{'\u26A1'}</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: colors.primary, textTransform: 'uppercase', letterSpacing: 1 }}>
+            Today&apos;s Focus
+          </span>
+        </div>
+
+        {/* Top priorities */}
+        {loadingTasks ? (
+          <div style={{ fontSize: 14, color: colors.textDim }}>Loading priorities...</div>
+        ) : errorTasks ? (
+          <div style={{ fontSize: 14, color: colors.danger }}>Failed to load tasks</div>
+        ) : highPriorityTasks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+            {highPriorityTasks.slice(0, 3).map((task, i) => (
+              <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: 6,
+                  background: i === 0 ? 'rgba(108,155,255,0.15)' : 'rgba(255,255,255,0.04)',
+                  border: `1.5px solid ${i === 0 ? colors.primary : colors.textGhost}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 10, fontWeight: 700, color: i === 0 ? colors.primary : colors.textFaint,
+                }}>
+                  {i + 1}
+                </div>
+                <span style={{
+                  fontSize: 14, color: i === 0 ? colors.text : 'rgba(240,237,230,0.7)',
+                  fontWeight: i === 0 ? 600 : 400,
+                }}>
+                  {task.content}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : tasks.length > 0 ? (
+          <div style={{ fontSize: 14, color: colors.textMuted }}>
+            {tasks.length} tasks today {'\u2014'} no high-priority items flagged
+          </div>
+        ) : (
+          <div style={{ fontSize: 14, color: colors.textMuted }}>
+            No tasks loaded {'\u2014'} check Todoist connection
+          </div>
+        )}
+
+        {/* Next event */}
+        {nextEvent && (
+          <div style={{
+            marginTop: spacing.md, paddingTop: spacing.md,
+            borderTop: '1px solid rgba(108,155,255,0.1)',
+            display: 'flex', alignItems: 'center', gap: spacing.sm,
+          }}>
+            <span style={{ fontSize: 12 }}>{'\u{1F4C5}'}</span>
+            <span style={{ fontSize: 13, color: colors.textDim }}>
+              Next: <span style={{ color: colors.text }}>{nextEvent.summary}</span>
+              {nextEvent.start && (
+                <span style={{ color: colors.textFaint }}>
+                  {' '}{'\u00B7'} {fmtTime(nextEvent.start)}
+                </span>
+              )}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Morning Practice Section */}
+      <Card
+        collapsible
+        collapsed={!practiceOpen}
+        onToggle={() => setPracticeOpen(!practiceOpen)}
+        title="Morning Practice"
+        subtitle={`${completedHabits}/${totalHabits} habits ${'\u00B7'} ${journalEntry ? 'journal \u2713' : 'journal pending'}`}
+        icon={'\u{1F305}'}
+        action={
+          <ProgressBar
+            value={habitProgress}
+            max={100}
+            height={4}
+            style={{ width: 48 }}
+          />
+        }
+        style={{ marginBottom: spacing.lg }}
+      >
+        {/* Habits */}
+        <div style={{ marginBottom: spacing.xl }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {HABITS.map((h) => {
+              const done = habits.includes(h.id);
+              return (
+                <button
+                  key={h.id}
+                  onClick={() => onHabitToggle(h.id)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+                    borderRadius: radius.full, fontSize: 13,
+                    border: done ? `1px solid ${colors.successBorder}` : `1px solid ${colors.borderActive}`,
+                    background: done ? colors.successBg : 'rgba(255,255,255,0.03)',
+                    cursor: 'pointer', transition: 'all 0.2s',
+                    color: done ? colors.success : colors.textMuted,
+                  }}
+                >
+                  <span style={{ fontSize: 14 }}>{h.icon}</span>
+                  <span>{h.label}</span>
+                  {done && <span style={{ fontSize: 11 }}>{'\u2713'}</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Breathwork */}
+        <div style={{ marginBottom: spacing.xl }}>
+          <button
+            onClick={() => setBreathOpen(!breathOpen)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 16px', borderRadius: radius.md,
+              border: `1px solid ${colors.secondaryBorder}`,
+              background: colors.secondaryBg, cursor: 'pointer', fontSize: 13,
+              color: colors.secondary, fontWeight: 500,
+            }}
+          >
+            <span>{'\u{1F32C}\uFE0F'} Breathwork &mdash; 4-4-6</span>
+            <span style={{ fontSize: 16, transition: 'transform 0.2s', transform: breathOpen ? 'rotate(180deg)' : 'none' }}>{'\u2304'}</span>
+          </button>
+          {breathOpen && <BreathTimer />}
+        </div>
+
+        {/* Journal */}
+        <div>
+          <div style={{ fontSize: 14, color: colors.textMuted, fontStyle: 'italic', marginBottom: spacing.md, lineHeight: 1.5, fontFamily: fonts.heading }}>
+            &ldquo;{prompt}&rdquo;
+          </div>
+          <textarea
+            value={journalEntry}
+            onChange={(e) => onJournalChange(e.target.value)}
+            placeholder="Write freely..."
+            style={{
+              width: '100%', minHeight: 100, padding: spacing.lg, borderRadius: radius.md,
+              border: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.03)',
+              color: colors.text, fontSize: 15, lineHeight: 1.6, resize: 'vertical',
+              fontFamily: fonts.body, outline: 'none', boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      </Card>
+
+      {/* Tasks Overview */}
+      <Card
+        title="Tasks"
+        subtitle={loadingTasks ? 'Loading...' : errorTasks ? 'Error' : `${tasks.length} due today`}
+        icon={'\u2705'}
+        action={
+          <button
+            onClick={() => onNavigate('tasks')}
+            style={{
+              fontSize: 12, color: colors.primary, background: 'none',
+              border: 'none', cursor: 'pointer', fontWeight: 500,
+            }}
+          >
+            View all {'\u2192'}
+          </button>
+        }
+        style={{ marginBottom: spacing.lg }}
+      >
+        {loadingTasks ? (
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>
+            Loading...
+          </div>
+        ) : errorTasks ? (
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>
+            Could not load tasks
+          </div>
+        ) : tasks.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {tasks.slice(0, 4).map((task) => {
+              const overdue = isTaskOverdue(task);
+              return (
+                <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
+                  <div style={{
+                    width: 8, height: 8, borderRadius: 4, flexShrink: 0,
+                    background: PRIORITY_COLORS[task.priority] || PRIORITY_COLORS[1],
+                  }} />
+                  <span style={{ fontSize: 14, color: colors.text, flex: 1 }}>{task.content}</span>
+                  {overdue && <Badge color={colors.danger} bg={colors.dangerBg}>overdue</Badge>}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div style={{ padding: spacing.lg, textAlign: 'center', color: colors.textFaint, fontSize: 14 }}>
+            All clear! {'\u{1F389}'}
+          </div>
+        )}
+      </Card>
+
+      {/* Calendar Preview */}
+      <Card
+        title="Schedule"
+        subtitle={loadingEvents ? 'Loading...' : errorEvents ? 'Error' : `${events.length} events`}
+        icon={'\u{1F4C5}'}
+        style={{ marginBottom: spacing.lg }}
+      >
+        {loadingEvents ? (
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>
+            Loading...
+          </div>
+        ) : errorEvents ? (
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>
+            Could not load calendar
+          </div>
+        ) : events.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {events.slice(0, 4).map((ev, i) => (
+              <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
+                <div style={{
+                  width: 3, height: 28, borderRadius: 2, flexShrink: 0,
+                  background: ev.color || colors.events[i % colors.events.length],
+                }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, color: colors.text }}>{ev.summary}</div>
+                  <div style={{ fontSize: 12, color: colors.textFaint }}>
+                    {fmtTime(ev.start)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: spacing.lg, textAlign: 'center', color: colors.textFaint, fontSize: 14 }}>
+            No events today
+          </div>
+        )}
+      </Card>
+
+      {/* Wheel of Life */}
+      <Card
+        title="Life Balance"
+        subtitle="Wheel of Life"
+        icon={'\u{1F3AF}'}
+        action={
+          <button
+            onClick={() => onNavigate('goals')}
+            style={{
+              fontSize: 12, color: colors.primary, background: 'none',
+              border: 'none', cursor: 'pointer', fontWeight: 500,
+            }}
+          >
+            Details {'\u2192'}
+          </button>
+        }
+        style={{ marginBottom: spacing.lg }}
+      >
+        <WheelOfLifeMini onNavigate={onNavigate} />
+      </Card>
+
+      {/* Knowledge Placeholder */}
+      <Card
+        title="Knowledge"
+        subtitle="Capture links, articles, and ideas"
+        icon={'\u{1F4DA}'}
+        style={{ marginBottom: spacing.lg }}
+      >
+        <div
+          onClick={() => onNavigate('knowledge')}
+          style={{
+            padding: `${spacing.xl}px`,
+            textAlign: 'center',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ fontSize: 32, marginBottom: spacing.sm }}>{'\u{1F9E0}'}</div>
+          <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.sm }}>
+            Your personal knowledge base
+          </div>
+          <div style={{ fontSize: 13, color: colors.primary, fontWeight: 500 }}>
+            Start capturing {'\u2192'}
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function WheelOfLifeMini({ onNavigate }) {
+  const [scores, setScores] = useState({});
+
+  useEffect(() => {
+    const saved = loadLocal(STORAGE_KEYS.wheelOfLife, null);
+    if (saved?.scores) setScores(saved.scores);
+  }, []);
+
+  const hasScores = Object.values(scores).some((v) => v > 0);
+
+  if (!hasScores) {
+    return (
+      <div
+        onClick={() => onNavigate('goals')}
+        style={{ padding: `${spacing.lg}px`, textAlign: 'center', cursor: 'pointer' }}
+      >
+        <WheelOfLife scores={{}} size={200} />
+        <div style={{ fontSize: 13, color: colors.textDim, marginTop: spacing.sm }}>
+          Tap to rate your life areas and set goals
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div onClick={() => onNavigate('goals')} style={{ cursor: 'pointer' }}>
+      <WheelOfLife scores={scores} size={220} />
+    </div>
+  );
+}

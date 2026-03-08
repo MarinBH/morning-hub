@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { loadLocal, saveLocal } from '../lib/utils';
 import { STORAGE_KEYS, WHEEL_OF_LIFE_AREAS } from '../lib/constants';
 
@@ -7,6 +7,7 @@ export function useWheelOfLife() {
   const [scores, setScores] = useState({});
   const [goals, setGoals] = useState({});
   const [loaded, setLoaded] = useState(false);
+  const saveTimer = useRef(null);
 
   useEffect(() => {
     const saved = loadLocal(STORAGE_KEYS.wheelOfLife, null);
@@ -17,9 +18,14 @@ export function useWheelOfLife() {
     setLoaded(true);
   }, []);
 
+  // Debounced save (300ms) — prevents rapid localStorage writes during slider drags
   useEffect(() => {
     if (!loaded) return;
-    saveLocal(STORAGE_KEYS.wheelOfLife, { scores, goals });
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveLocal(STORAGE_KEYS.wheelOfLife, { scores, goals });
+    }, 300);
+    return () => clearTimeout(saveTimer.current);
   }, [scores, goals, loaded]);
 
   const setScore = (areaId, score) => {
@@ -27,10 +33,9 @@ export function useWheelOfLife() {
   };
 
   const addGoal = (areaId, text) => {
-    const areaGoals = goals[areaId] || [];
     setGoals((prev) => ({
       ...prev,
-      [areaId]: [...areaGoals, { id: crypto.randomUUID(), text, done: false }],
+      [areaId]: [...(prev[areaId] || []), { id: crypto.randomUUID(), text, done: false }],
     }));
   };
 

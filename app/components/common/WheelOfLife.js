@@ -8,6 +8,7 @@ export default function WheelOfLife({
   size = 280,
   interactive = false,
   onScoreChange,
+  avgScore: avgScoreProp,
 }) {
   const cx = size / 2;
   const cy = size / 2;
@@ -170,7 +171,7 @@ export default function WheelOfLife({
             fontFamily: fonts.body,
           }}
         >
-          {getAvgScore(scores)}
+          {avgScoreProp ?? getAvgScore(scores)}
         </text>
         <text
           x={cx}

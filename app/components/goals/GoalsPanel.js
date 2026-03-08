@@ -4,6 +4,7 @@ import { colors, radius, spacing, typography, fonts } from '../../lib/theme';
 import { WHEEL_OF_LIFE_AREAS } from '../../lib/constants';
 import { useWheelOfLife } from '../../hooks/useWheelOfLife';
 import Card from '../common/Card';
+import ProgressBar from '../common/ProgressBar';
 import WheelOfLife from '../common/WheelOfLife';
 
 export default function GoalsPanel() {
@@ -60,25 +61,7 @@ export default function GoalsPanel() {
               title={`${area.icon} ${area.label}`}
               subtitle={`${score}/10${areaGoals.length > 0 ? ` \u00B7 ${completedGoals}/${areaGoals.length} goals` : ''}`}
               action={
-                <div
-                  style={{
-                    width: 32,
-                    height: 6,
-                    borderRadius: 3,
-                    background: 'rgba(255,255,255,0.06)',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${score * 10}%`,
-                      height: '100%',
-                      borderRadius: 3,
-                      background: area.color,
-                      transition: 'width 0.3s',
-                    }}
-                  />
-                </div>
+                <ProgressBar value={score} max={10} height={6} color={area.color} style={{ width: 32 }} />
               }
               style={{ borderLeft: `3px solid ${area.color}` }}
             >

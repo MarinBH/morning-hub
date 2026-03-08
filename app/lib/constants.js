@@ -30,12 +30,14 @@ export const NAV_ITEMS = [
   { id: 'goals', label: 'Life Wheel', icon: '\u{1F3AF}' },
 ];
 
-// Priority color mapping (Todoist priority 1-4)
+// Priority color mapping (Todoist priority 1-4) — references theme tokens
+import { colors } from './theme';
+
 export const PRIORITY_COLORS = {
-  4: '#FF6B6B',  // p1 - urgent
-  3: '#FFB86C',  // p2 - high
-  2: '#6C9BFF',  // p3 - medium
-  1: 'rgba(240,237,230,0.3)', // p4 - low
+  4: colors.p1,  // urgent
+  3: colors.p2,  // high
+  2: colors.p3,  // medium
+  1: colors.p4,  // low
 };
 
 // localStorage keys

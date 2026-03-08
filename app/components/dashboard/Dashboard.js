@@ -1,44 +1,24 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { colors, radius, spacing, typography, fonts } from '../../lib/theme';
-import { getDateString, fmtTime, loadLocal } from '../../lib/utils';
-import { filterSystemTasks, isTaskOverdue } from '../../lib/utils';
-import { HABITS, getPrompt, PRIORITY_COLORS, STORAGE_KEYS, API } from '../../lib/constants';
+import { useState } from 'react';
+import { colors, radius, spacing, typography } from '../../lib/theme';
+import { getDateString, fmtTime } from '../../lib/utils';
+import { isTaskOverdue } from '../../lib/utils';
+import { HABITS, getPrompt, PRIORITY_COLORS } from '../../lib/constants';
+import { useTasks } from '../../contexts/TasksContext';
+import { useCalendarEvents } from '../../contexts/CalendarContext';
+import { useWheelOfLife } from '../../hooks/useWheelOfLife';
 import Card from '../common/Card';
 import ProgressBar from '../common/ProgressBar';
 import Badge from '../common/Badge';
 import WheelOfLife from '../common/WheelOfLife';
-import BreathTimer from '../practice/BreathTimer';
+import HabitList from '../practice/HabitList';
+import BreathworkSection from '../practice/BreathworkSection';
+import JournalEntry from '../practice/JournalEntry';
 
 export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate }) {
-  const [events, setEvents] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-  const [loadingTasks, setLoadingTasks] = useState(true);
-  const [errorEvents, setErrorEvents] = useState(null);
-  const [errorTasks, setErrorTasks] = useState(null);
+  const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
+  const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
   const [practiceOpen, setPracticeOpen] = useState(true);
-  const [breathOpen, setBreathOpen] = useState(false);
-
-  // Fetch calendar events
-  useEffect(() => {
-    fetch(API.calendar)
-      .then((r) => r.json())
-      .then((d) => { setEvents(d.events || []); setLoadingEvents(false); })
-      .catch((err) => { setErrorEvents(err.message); setLoadingEvents(false); });
-  }, []);
-
-  // Fetch tasks
-  useEffect(() => {
-    fetch(API.todoistTasks)
-      .then((r) => r.json())
-      .then((d) => {
-        const filtered = filterSystemTasks(d.results || []);
-        setTasks(filtered.sort((a, b) => b.priority - a.priority).slice(0, 5));
-        setLoadingTasks(false);
-      })
-      .catch((err) => { setErrorTasks(err.message); setLoadingTasks(false); });
-  }, []);
 
   const completedHabits = habits.length;
   const totalHabits = HABITS.length;
@@ -47,10 +27,11 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
 
   const nextEvent = events[0];
   const highPriorityTasks = tasks.filter((t) => t.priority >= 3);
+  const previewTasks = tasks.slice(0, 5);
 
   return (
     <div style={{ padding: `0 ${spacing.xl}px 100px` }}>
-      {/* Date & Greeting */}
+      {/* Date */}
       <div style={{ marginBottom: spacing.xxl }}>
         <div style={typography.label}>{getDateString().toUpperCase()}</div>
       </div>
@@ -72,7 +53,6 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           </span>
         </div>
 
-        {/* Top priorities */}
         {loadingTasks ? (
           <div style={{ fontSize: 14, color: colors.textDim }}>Loading priorities...</div>
         ) : errorTasks ? (
@@ -99,9 +79,9 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
               </div>
             ))}
           </div>
-        ) : tasks.length > 0 ? (
+        ) : previewTasks.length > 0 ? (
           <div style={{ fontSize: 14, color: colors.textMuted }}>
-            {tasks.length} tasks today {'\u2014'} no high-priority items flagged
+            {previewTasks.length} tasks today {'\u2014'} no high-priority items flagged
           </div>
         ) : (
           <div style={{ fontSize: 14, color: colors.textMuted }}>
@@ -109,7 +89,6 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           </div>
         )}
 
-        {/* Next event */}
         {nextEvent && (
           <div style={{
             marginTop: spacing.md, paddingTop: spacing.md,
@@ -129,7 +108,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         )}
       </div>
 
-      {/* Morning Practice Section */}
+      {/* Morning Practice */}
       <Card
         collapsible
         collapsed={!practiceOpen}
@@ -137,92 +116,27 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         title="Morning Practice"
         subtitle={`${completedHabits}/${totalHabits} habits ${'\u00B7'} ${journalEntry ? 'journal \u2713' : 'journal pending'}`}
         icon={'\u{1F305}'}
-        action={
-          <ProgressBar
-            value={habitProgress}
-            max={100}
-            height={4}
-            style={{ width: 48 }}
-          />
-        }
+        action={<ProgressBar value={habitProgress} max={100} height={4} style={{ width: 48 }} />}
         style={{ marginBottom: spacing.lg }}
       >
-        {/* Habits */}
         <div style={{ marginBottom: spacing.xl }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {HABITS.map((h) => {
-              const done = habits.includes(h.id);
-              return (
-                <button
-                  key={h.id}
-                  onClick={() => onHabitToggle(h.id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
-                    borderRadius: radius.full, fontSize: 13,
-                    border: done ? `1px solid ${colors.successBorder}` : `1px solid ${colors.borderActive}`,
-                    background: done ? colors.successBg : 'rgba(255,255,255,0.03)',
-                    cursor: 'pointer', transition: 'all 0.2s',
-                    color: done ? colors.success : colors.textMuted,
-                  }}
-                >
-                  <span style={{ fontSize: 14 }}>{h.icon}</span>
-                  <span>{h.label}</span>
-                  {done && <span style={{ fontSize: 11 }}>{'\u2713'}</span>}
-                </button>
-              );
-            })}
-          </div>
+          <HabitList habits={habits} onToggle={onHabitToggle} compact />
         </div>
-
-        {/* Breathwork */}
         <div style={{ marginBottom: spacing.xl }}>
-          <button
-            onClick={() => setBreathOpen(!breathOpen)}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px 16px', borderRadius: radius.md,
-              border: `1px solid ${colors.secondaryBorder}`,
-              background: colors.secondaryBg, cursor: 'pointer', fontSize: 13,
-              color: colors.secondary, fontWeight: 500,
-            }}
-          >
-            <span>{'\u{1F32C}\uFE0F'} Breathwork &mdash; 4-4-6</span>
-            <span style={{ fontSize: 16, transition: 'transform 0.2s', transform: breathOpen ? 'rotate(180deg)' : 'none' }}>{'\u2304'}</span>
-          </button>
-          {breathOpen && <BreathTimer />}
+          <BreathworkSection label="4-4-6" compact />
         </div>
-
-        {/* Journal */}
-        <div>
-          <div style={{ fontSize: 14, color: colors.textMuted, fontStyle: 'italic', marginBottom: spacing.md, lineHeight: 1.5, fontFamily: fonts.heading }}>
-            &ldquo;{prompt}&rdquo;
-          </div>
-          <textarea
-            value={journalEntry}
-            onChange={(e) => onJournalChange(e.target.value)}
-            placeholder="Write freely..."
-            style={{
-              width: '100%', minHeight: 100, padding: spacing.lg, borderRadius: radius.md,
-              border: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.03)',
-              color: colors.text, fontSize: 15, lineHeight: 1.6, resize: 'vertical',
-              fontFamily: fonts.body, outline: 'none', boxSizing: 'border-box',
-            }}
-          />
-        </div>
+        <JournalEntry value={journalEntry} onChange={onJournalChange} prompt={prompt} compact />
       </Card>
 
       {/* Tasks Overview */}
       <Card
         title="Tasks"
-        subtitle={loadingTasks ? 'Loading...' : errorTasks ? 'Error' : `${tasks.length} due today`}
+        subtitle={loadingTasks ? 'Loading...' : errorTasks ? 'Error' : `${previewTasks.length} due today`}
         icon={'\u2705'}
         action={
           <button
             onClick={() => onNavigate('tasks')}
-            style={{
-              fontSize: 12, color: colors.primary, background: 'none',
-              border: 'none', cursor: 'pointer', fontWeight: 500,
-            }}
+            style={{ fontSize: 12, color: colors.primary, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}
           >
             View all {'\u2192'}
           </button>
@@ -230,16 +144,12 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         style={{ marginBottom: spacing.lg }}
       >
         {loadingTasks ? (
-          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>
-            Loading...
-          </div>
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>Loading...</div>
         ) : errorTasks ? (
-          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>
-            Could not load tasks
-          </div>
-        ) : tasks.length > 0 ? (
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>Could not load tasks</div>
+        ) : previewTasks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {tasks.slice(0, 4).map((task) => {
+            {previewTasks.slice(0, 4).map((task) => {
               const overdue = isTaskOverdue(task);
               return (
                 <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
@@ -268,13 +178,9 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         style={{ marginBottom: spacing.lg }}
       >
         {loadingEvents ? (
-          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>
-            Loading...
-          </div>
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.textFaint }}>Loading...</div>
         ) : errorEvents ? (
-          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>
-            Could not load calendar
-          </div>
+          <div style={{ padding: spacing.xl, textAlign: 'center', color: colors.danger, fontSize: 14 }}>Could not load calendar</div>
         ) : events.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {events.slice(0, 4).map((ev, i) => (
@@ -285,17 +191,13 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
                 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, color: colors.text }}>{ev.summary}</div>
-                  <div style={{ fontSize: 12, color: colors.textFaint }}>
-                    {fmtTime(ev.start)}
-                  </div>
+                  <div style={{ fontSize: 12, color: colors.textFaint }}>{fmtTime(ev.start)}</div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div style={{ padding: spacing.lg, textAlign: 'center', color: colors.textFaint, fontSize: 14 }}>
-            No events today
-          </div>
+          <div style={{ padding: spacing.lg, textAlign: 'center', color: colors.textFaint, fontSize: 14 }}>No events today</div>
         )}
       </Card>
 
@@ -307,10 +209,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         action={
           <button
             onClick={() => onNavigate('goals')}
-            style={{
-              fontSize: 12, color: colors.primary, background: 'none',
-              border: 'none', cursor: 'pointer', fontWeight: 500,
-            }}
+            style={{ fontSize: 12, color: colors.primary, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}
           >
             Details {'\u2192'}
           </button>
@@ -329,19 +228,11 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
       >
         <div
           onClick={() => onNavigate('knowledge')}
-          style={{
-            padding: `${spacing.xl}px`,
-            textAlign: 'center',
-            cursor: 'pointer',
-          }}
+          style={{ padding: `${spacing.xl}px`, textAlign: 'center', cursor: 'pointer' }}
         >
           <div style={{ fontSize: 32, marginBottom: spacing.sm }}>{'\u{1F9E0}'}</div>
-          <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.sm }}>
-            Your personal knowledge base
-          </div>
-          <div style={{ fontSize: 13, color: colors.primary, fontWeight: 500 }}>
-            Start capturing {'\u2192'}
-          </div>
+          <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.sm }}>Your personal knowledge base</div>
+          <div style={{ fontSize: 13, color: colors.primary, fontWeight: 500 }}>Start capturing {'\u2192'}</div>
         </div>
       </Card>
     </div>
@@ -349,21 +240,12 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
 }
 
 function WheelOfLifeMini({ onNavigate }) {
-  const [scores, setScores] = useState({});
-
-  useEffect(() => {
-    const saved = loadLocal(STORAGE_KEYS.wheelOfLife, null);
-    if (saved?.scores) setScores(saved.scores);
-  }, []);
-
+  const { scores } = useWheelOfLife();
   const hasScores = Object.values(scores).some((v) => v > 0);
 
   if (!hasScores) {
     return (
-      <div
-        onClick={() => onNavigate('goals')}
-        style={{ padding: `${spacing.lg}px`, textAlign: 'center', cursor: 'pointer' }}
-      >
+      <div onClick={() => onNavigate('goals')} style={{ padding: `${spacing.lg}px`, textAlign: 'center', cursor: 'pointer' }}>
         <WheelOfLife scores={{}} size={200} />
         <div style={{ fontSize: 13, color: colors.textDim, marginTop: spacing.sm }}>
           Tap to rate your life areas and set goals

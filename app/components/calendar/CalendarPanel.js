@@ -1,23 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
 import { colors, radius, spacing, typography } from '../../lib/theme';
 import { fmtTime, fmtDuration, getDateString } from '../../lib/utils';
+import { useCalendarEvents } from '../../contexts/CalendarContext';
 
 export default function CalendarPanel() {
-  const [events, setEvents] = useState([]);
-  const [configured, setConfigured] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/calendar')
-      .then((r) => r.json())
-      .then((d) => {
-        setEvents(d.events || []);
-        setConfigured(d.configured);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { events, configured, loading } = useCalendarEvents();
 
   return (
     <div style={{ padding: `0 ${spacing.xl}px 100px` }}>
@@ -54,7 +41,7 @@ export default function CalendarPanel() {
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 15, color: 'rgba(240,237,230,0.85)', lineHeight: 1.4 }}>
+                <div style={{ fontSize: 15, color: colors.textMuted, lineHeight: 1.4 }}>
                   {ev.summary}
                 </div>
                 {ev.location && (

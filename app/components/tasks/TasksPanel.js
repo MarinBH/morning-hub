@@ -1,57 +1,16 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { colors, radius, spacing, typography } from '../../lib/theme';
-import { isTaskOverdue, filterSystemTasks } from '../../lib/utils';
+import { isTaskOverdue } from '../../lib/utils';
 import { PRIORITY_COLORS, API } from '../../lib/constants';
+import { useTasks } from '../../contexts/TasksContext';
+import Badge from '../common/Badge';
 
 export default function TasksPanel() {
-  const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState({});
+  const { tasks, projects, loading, error, removeTask } = useTasks();
   const [completing, setCompleting] = useState(new Set());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
-  const loadTasks = useCallback(async () => {
-    try {
-      const [taskRes, projRes] = await Promise.all([
-        fetch(API.todoistTasks),
-        fetch(API.todoistProjects),
-      ]);
-      const taskData = await taskRes.json();
-      const projData = await projRes.json();
-
-      if (taskData.error) {
-        setError(taskData.error);
-        setLoading(false);
-        return;
-      }
-
-      const projMap = {};
-      (projData.results || []).forEach((p) => {
-        projMap[p.id] = p.name;
-      });
-      setProjects(projMap);
-
-      const sorted = (taskData.results || []).sort((a, b) => {
-        if (a.priority !== b.priority) return b.priority - a.priority;
-        const aDate = a.due?.date || '9999';
-        const bDate = b.due?.date || '9999';
-        return aDate.localeCompare(bDate);
-      });
-
-      setTasks(filterSystemTasks(sorted));
-      setLoading(false);
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadTasks();
-  }, [loadTasks]);
-
-  const completeTask = async (taskId) => {
+  const completeTask = useCallback(async (taskId) => {
     setCompleting((prev) => new Set(prev).add(taskId));
     try {
       await fetch(API.todoist, {
@@ -60,7 +19,7 @@ export default function TasksPanel() {
         body: JSON.stringify({ taskId, action: 'complete' }),
       });
       setTimeout(() => {
-        setTasks((prev) => prev.filter((t) => t.id !== taskId));
+        removeTask(taskId);
         setCompleting((prev) => {
           const n = new Set(prev);
           n.delete(taskId);
@@ -74,7 +33,7 @@ export default function TasksPanel() {
         return n;
       });
     }
-  };
+  }, [removeTask]);
 
   return (
     <div style={{ padding: `0 ${spacing.xl}px 100px` }}>
@@ -159,14 +118,7 @@ export default function TasksPanel() {
                   >
                     {task.content}
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 8,
-                      marginTop: 4,
-                      alignItems: 'center',
-                    }}
-                  >
+                  <div style={{ display: 'flex', gap: 8, marginTop: 4, alignItems: 'center' }}>
                     <span
                       style={{
                         fontSize: 11,
@@ -177,19 +129,7 @@ export default function TasksPanel() {
                     >
                       {projects[task.project_id] || 'Inbox'}
                     </span>
-                    {overdue && (
-                      <span
-                        style={{
-                          fontSize: 10,
-                          color: colors.danger,
-                          background: colors.dangerBg,
-                          padding: '1px 6px',
-                          borderRadius: 4,
-                        }}
-                      >
-                        overdue
-                      </span>
-                    )}
+                    {overdue && <Badge color={colors.danger} bg={colors.dangerBg}>overdue</Badge>}
                   </div>
                 </div>
               </div>

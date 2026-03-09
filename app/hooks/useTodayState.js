@@ -7,6 +7,7 @@ export function useTodayState() {
   const [habits, setHabits] = useState([]);
   const [journal, setJournal] = useState('');
   const [captures, setCaptures] = useState([]);
+  const [breathworkDone, setBreathworkDone] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef(null);
 
@@ -17,6 +18,7 @@ export function useTodayState() {
       setHabits(saved.habits || []);
       setJournal(saved.journal || '');
       setCaptures(saved.captures || []);
+      setBreathworkDone(saved.breathworkDone || false);
     }
     setLoaded(true);
   }, []);
@@ -26,19 +28,21 @@ export function useTodayState() {
     if (!loaded) return;
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveLocal(STORAGE_KEYS.dailyState(todayKey()), { habits, journal, captures });
+      saveLocal(STORAGE_KEYS.dailyState(todayKey()), { habits, journal, captures, breathworkDone });
     }, 500);
     return () => clearTimeout(saveTimerRef.current);
-  }, [habits, journal, captures, loaded]);
+  }, [habits, journal, captures, breathworkDone, loaded]);
 
   const toggleHabit = (id) =>
     setHabits((p) => (p.includes(id) ? p.filter((h) => h !== id) : [...p, id]));
 
   const addCapture = (capture) => setCaptures((p) => [...p, capture]);
 
-  // Momentum score — derived, not stored
+  // Momentum score — habits 50%, journal 25%, breathwork 25%
   const momentumScore = Math.round(
-    ((habits.length / HABITS.length) * 100 + (journal ? 100 : 0)) / 2
+    (habits.length / HABITS.length) * 50 +
+    (journal ? 25 : 0) +
+    (breathworkDone ? 25 : 0)
   );
 
   // Streak — count consecutive days with at least 1 habit logged (memoized)
@@ -65,11 +69,13 @@ export function useTodayState() {
     habits,
     journal,
     captures,
+    breathworkDone,
     loaded,
     momentumScore,
     streakDays,
     toggleHabit,
     setJournal,
     addCapture,
+    setBreathworkDone,
   };
 }

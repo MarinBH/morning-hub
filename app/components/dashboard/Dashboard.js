@@ -109,7 +109,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         )}
 
         {/* Start my day button */}
-        {!committed && !loadingTasks && highPriorityTasks.length > 0 && (
+        {!committed && !loadingTasks && (
           <button
             onClick={onCommit}
             style={{

@@ -14,6 +14,30 @@ export const JOURNAL_PROMPTS = [
   'What did I learn yesterday that I want to carry forward?',
   "Where am I holding back, and what would happen if I didn't?",
   "What's one thing I've been avoiding that deserves 10 minutes today?",
+  'If I could only accomplish one thing today, what would it be?',
+  'What would I do today if I had no fear?',
+  'Who can I help or reach out to today?',
+  "What's a small win I can get in the first hour?",
+  'What habit am I proud of building recently?',
+  'What energy am I bringing into today?',
+  "What's one thing I'd like to learn today?",
+  'How do I want to feel at the end of today?',
+  "What's something I'm looking forward to?",
+  'What boundary do I need to protect today?',
+  "What's one thing I can let go of?",
+  'Who inspires me right now, and why?',
+  "What's a challenge I'm ready to face?",
+  "What's working well in my life that I should do more of?",
+  'If today were my last, what would matter most?',
+  'What would make my future self proud?',
+  'What do I need to say no to today?',
+  "What's a recent mistake that taught me something?",
+  'How can I bring more play into today?',
+  'What relationship deserves more attention?',
+  "What's one way I can simplify today?",
+  "What's draining my energy, and can I change it?",
+  'What intention do I want to set for this week?',
+  'What am I curious about right now?',
 ];
 
 export function getPrompt() {
@@ -26,8 +50,8 @@ export function getPrompt() {
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Home', icon: '\u{26A1}' },
   { id: 'tasks', label: 'Tasks', icon: '\u{2705}' },
-  { id: 'knowledge', label: 'Knowledge', icon: '\u{1F4DA}' },
-  { id: 'goals', label: 'Life Wheel', icon: '\u{1F3AF}' },
+  { id: 'practice', label: 'Practice', icon: '\u{1F9D8}' },
+  { id: 'goals', label: 'Goals', icon: '\u{1F3AF}' },
 ];
 
 // Priority color mapping (Todoist priority 1-4) — references theme tokens

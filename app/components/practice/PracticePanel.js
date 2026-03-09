@@ -1,18 +1,14 @@
 'use client';
 import { useState } from 'react';
-import { spacing, typography, colors, radius } from '../../lib/theme';
-import { HABITS, getPrompt } from '../../lib/constants';
-import HabitList from './HabitList';
-import BreathworkSection from './BreathworkSection';
-import JournalEntry from './JournalEntry';
+import { spacing, typography, colors } from '../../lib/theme';
+import { HABITS } from '../../lib/constants';
+import MorningFlow from './MorningFlow';
 import HabitPackPicker from './HabitPackPicker';
 
-export default function PracticePanel({ habits, journalEntry, onHabitToggle, onJournalChange, habitConfig }) {
-  const prompt = getPrompt();
+export default function PracticePanel({ habits, journalEntry, onHabitToggle, onJournalChange, habitConfig, onBreathworkDone, committed, onCommit, streakDays }) {
   const [showPicker, setShowPicker] = useState(false);
 
   const habitDefs = habitConfig?.habits?.length > 0 ? habitConfig.habits : HABITS;
-  const totalHabits = habitDefs.length;
 
   // Show picker on first use (no config) or when user requests it
   if (!habitConfig?.isConfigured && habitConfig?.loaded) {
@@ -39,7 +35,7 @@ export default function PracticePanel({ habits, journalEntry, onHabitToggle, onJ
         <div>
           <div style={typography.label}>MORNING PRACTICE</div>
           <div style={{ fontSize: 14, color: colors.textDim }}>
-            {habits.length}/{totalHabits} habits {'\u00B7'} {journalEntry ? '\u270D\uFE0F written' : '\u{1F4DD} journal'}
+            {habits.length}/{habitDefs.length} habits {'\u00B7'} {journalEntry ? '\u270D\uFE0F written' : '\u{1F4DD} journal'}
           </div>
         </div>
         <button
@@ -57,22 +53,17 @@ export default function PracticePanel({ habits, journalEntry, onHabitToggle, onJ
         </button>
       </div>
 
-      {/* Habits */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={typography.sub}>Habits</div>
-        <HabitList habits={habits} onToggle={onHabitToggle} habitDefs={habitDefs} />
-      </div>
-
-      {/* Breathwork */}
-      <div style={{ marginBottom: 28 }}>
-        <BreathworkSection label="Box Breathing" />
-      </div>
-
-      {/* Journal */}
-      <div>
-        <div style={typography.sub}>Journal</div>
-        <JournalEntry value={journalEntry} onChange={onJournalChange} prompt={prompt} />
-      </div>
+      <MorningFlow
+        habits={habits}
+        habitDefs={habitDefs}
+        onHabitToggle={onHabitToggle}
+        journalEntry={journalEntry}
+        onJournalChange={onJournalChange}
+        onBreathworkDone={onBreathworkDone}
+        committed={committed}
+        onCommit={onCommit}
+        streakDays={streakDays}
+      />
     </div>
   );
 }

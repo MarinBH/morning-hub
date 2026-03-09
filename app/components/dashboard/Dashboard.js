@@ -1,31 +1,22 @@
 'use client';
-import { useState } from 'react';
 import { colors, radius, spacing, typography } from '../../lib/theme';
 import { getDateString, fmtTime } from '../../lib/utils';
 import { isTaskOverdue } from '../../lib/utils';
-import { HABITS, getPrompt, PRIORITY_COLORS } from '../../lib/constants';
+import { HABITS, PRIORITY_COLORS } from '../../lib/constants';
 import { useTasks } from '../../contexts/TasksContext';
 import { useCalendarEvents } from '../../contexts/CalendarContext';
 import { useWheelOfLifeContext } from '../../contexts/WheelOfLifeContext';
 import Card from '../common/Card';
-import ProgressBar from '../common/ProgressBar';
 import Badge from '../common/Badge';
 import WheelOfLife from '../common/WheelOfLife';
-import Skeleton, { SkeletonCard } from '../common/Skeleton';
-import HabitList from '../practice/HabitList';
-import BreathworkSection from '../practice/BreathworkSection';
-import JournalEntry from '../practice/JournalEntry';
+import { SkeletonCard } from '../common/Skeleton';
+import MorningFlow from '../practice/MorningFlow';
 
-export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig }) {
+export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig, onBreathworkDone, streakDays }) {
   const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
   const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
-  const [practiceOpen, setPracticeOpen] = useState(true);
 
   const habitDefs = habitConfig?.habits?.length > 0 ? habitConfig.habits : HABITS;
-  const completedHabits = habits.length;
-  const totalHabits = habitDefs.length;
-  const habitProgress = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
-  const prompt = getPrompt();
 
   const nextEvent = events[0];
   const highPriorityTasks = tasks.filter((t) => t.priority >= 3);
@@ -109,60 +100,23 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           </div>
         )}
 
-        {/* Start my day button */}
-        {!committed && !loadingTasks && (
-          <button
-            onClick={onCommit}
-            style={{
-              width: '100%',
-              marginTop: spacing.md,
-              padding: `${spacing.md}px`,
-              borderRadius: radius.sm,
-              border: 'none',
-              background: colors.gradient,
-              color: '#fff',
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-              letterSpacing: 0.5,
-              transition: 'opacity 0.2s',
-            }}
-          >
-            {'\u26A1'} Start my day
-          </button>
-        )}
-        {committed && (
-          <div style={{
-            marginTop: spacing.md,
-            padding: `${spacing.sm}px`,
-            textAlign: 'center',
-            fontSize: 13,
-            color: colors.success,
-          }}>
-            {'\u2713'} Locked in &mdash; let&apos;s go
-          </div>
-        )}
       </div>
 
-      {/* Morning Practice */}
-      <Card
-        collapsible
-        collapsed={!practiceOpen}
-        onToggle={() => setPracticeOpen(!practiceOpen)}
-        title="Morning Practice"
-        subtitle={`${completedHabits}/${totalHabits} habits ${'\u00B7'} ${journalEntry ? 'journal \u2713' : 'journal pending'}`}
-        icon={'\u{1F305}'}
-        action={<ProgressBar value={habitProgress} max={100} height={4} style={{ width: 48 }} />}
-        style={{ marginBottom: spacing.lg }}
-      >
-        <div style={{ marginBottom: spacing.xl }}>
-          <HabitList habits={habits} onToggle={onHabitToggle} habitDefs={habitDefs} compact />
-        </div>
-        <div style={{ marginBottom: spacing.xl }}>
-          <BreathworkSection label="4-4-6" compact />
-        </div>
-        <JournalEntry value={journalEntry} onChange={onJournalChange} prompt={prompt} compact />
-      </Card>
+      {/* Morning Flow Carousel */}
+      <div style={{ marginBottom: spacing.lg }}>
+        <MorningFlow
+          habits={habits}
+          habitDefs={habitDefs}
+          onHabitToggle={onHabitToggle}
+          journalEntry={journalEntry}
+          onJournalChange={onJournalChange}
+          onBreathworkDone={onBreathworkDone}
+          committed={committed}
+          onCommit={onCommit}
+          streakDays={streakDays}
+          compact
+        />
+      </div>
 
       {/* Tasks Overview */}
       <Card

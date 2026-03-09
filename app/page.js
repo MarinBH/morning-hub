@@ -151,6 +151,8 @@ function AppShell({
                 committed={committed}
                 onCommit={onCommit}
                 habitConfig={habitConfig}
+                onBreathworkDone={() => setBreathworkDone(true)}
+                streakDays={streakDays}
               />
             )}
             {t === 'tasks' && <TasksPanel />}
@@ -161,6 +163,10 @@ function AppShell({
                 onHabitToggle={toggleHabit}
                 onJournalChange={setJournal}
                 habitConfig={habitConfig}
+                onBreathworkDone={() => setBreathworkDone(true)}
+                committed={committed}
+                onCommit={onCommit}
+                streakDays={streakDays}
               />
             )}
             {t === 'goals' && <GoalsPanel />}

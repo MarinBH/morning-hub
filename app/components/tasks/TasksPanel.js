@@ -9,15 +9,20 @@ import Badge from '../common/Badge';
 export default function TasksPanel() {
   const { tasks, projects, loading, error, removeTask } = useTasks();
   const [completing, setCompleting] = useState(new Set());
+  const [completeError, setCompleteError] = useState(null);
 
   const completeTask = useCallback(async (taskId) => {
     setCompleting((prev) => new Set(prev).add(taskId));
+    setCompleteError(null);
     try {
-      await fetch(API.todoist, {
+      const res = await fetch(API.todoist, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ taskId, action: 'complete' }),
       });
+      if (!res.ok) {
+        throw new Error('Failed to complete task');
+      }
       setTimeout(() => {
         removeTask(taskId);
         setCompleting((prev) => {
@@ -32,6 +37,8 @@ export default function TasksPanel() {
         n.delete(taskId);
         return n;
       });
+      setCompleteError('Could not complete task. Please try again.');
+      setTimeout(() => setCompleteError(null), 3000);
     }
   }, [removeTask]);
 
@@ -58,6 +65,12 @@ export default function TasksPanel() {
           <div style={{ fontSize: 12, color: colors.textDim, marginTop: 4 }}>
             Check TODOIST_API_TOKEN in Vercel env vars
           </div>
+        </div>
+      )}
+
+      {completeError && (
+        <div style={{ padding: `${spacing.sm}px 18px`, background: colors.dangerBg, borderRadius: radius.md, marginBottom: spacing.sm, fontSize: 13, color: colors.danger }}>
+          {completeError}
         </div>
       )}
 

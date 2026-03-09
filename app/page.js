@@ -17,6 +17,7 @@ import TasksPanel from './components/tasks/TasksPanel';
 import GoalsPanel from './components/goals/GoalsPanel';
 import KnowledgePanel from './components/knowledge/KnowledgePanel';
 import CaptureModal from './components/capture/CaptureModal';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const TABS = ['dashboard', 'tasks', 'knowledge', 'goals'];
 
@@ -47,6 +48,7 @@ export default function CommandCenter() {
     <TasksProvider>
       <CalendarProvider>
         <WheelOfLifeProvider>
+        <ErrorBoundary>
         <AppShell
           tab={tab}
           setTab={setTab}
@@ -65,6 +67,7 @@ export default function CommandCenter() {
           setJournal={setJournal}
           addCapture={addCapture}
         />
+        </ErrorBoundary>
         </WheelOfLifeProvider>
       </CalendarProvider>
     </TasksProvider>

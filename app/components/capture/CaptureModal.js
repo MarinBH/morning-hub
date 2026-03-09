@@ -13,7 +13,17 @@ export default function CaptureModal({ open, onClose, onCapture }) {
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
   const [dest, setDest] = useState('inbox');
+  const [submitError, setSubmitError] = useState(null);
   const recRef = useRef(null);
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (open) {
+      setText('');
+      setDest('inbox');
+      setSubmitError(null);
+    }
+  }, [open]);
 
   // Clean up speech recognition on unmount
   useEffect(() => {
@@ -33,7 +43,7 @@ export default function CaptureModal({ open, onClose, onCapture }) {
   const startVoice = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      alert('Voice not supported. Use Chrome on Android.');
+      setSubmitError('Voice input not supported in this browser. Try Chrome on Android.');
       return;
     }
     const r = new SR();
@@ -41,9 +51,9 @@ export default function CaptureModal({ open, onClose, onCapture }) {
     r.interimResults = true;
     r.lang = 'en-US';
     r.onresult = (e) => {
-      let t = '';
-      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      setText(t);
+      let transcript = '';
+      for (let i = 0; i < e.results.length; i++) transcript += e.results[i][0].transcript;
+      setText((prev) => prev ? prev + ' ' + transcript : transcript);
     };
     r.onerror = () => setListening(false);
     r.onend = () => setListening(false);
@@ -64,17 +74,20 @@ export default function CaptureModal({ open, onClose, onCapture }) {
 
     if (dest === 'task') {
       try {
-        await fetch(API.todoist, {
+        const res = await fetch(API.todoist, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'add', content: text.trim() }),
         });
-      } catch {}
+        if (!res.ok) throw new Error('Failed to create task');
+      } catch {
+        setSubmitError('Could not create task in Todoist. Saved locally.');
+      }
     }
 
     onCapture(capture);
     setText('');
-    onClose();
+    if (!submitError) onClose();
   };
 
   if (!open) return null;
@@ -85,6 +98,12 @@ export default function CaptureModal({ open, onClose, onCapture }) {
       <div style={{ position: 'relative', width: '100%', maxWidth: 480, background: colors.bgElevated, borderRadius: `${radius.lg}px ${radius.lg}px 0 0`, padding: '24px 20px 32px', animation: 'slideUp 0.3s ease' }}>
         <div style={{ width: 40, height: 4, borderRadius: 2, background: colors.textGhost, margin: '0 auto 20px' }} />
         <div style={{ fontSize: 18, fontWeight: 600, color: colors.text, marginBottom: 16 }}>Quick Capture</div>
+
+        {submitError && (
+          <div style={{ padding: '10px 14px', background: colors.dangerBg, borderRadius: radius.md, marginBottom: 12, fontSize: 13, color: colors.danger }}>
+            {submitError}
+          </div>
+        )}
 
         <textarea
           value={text}

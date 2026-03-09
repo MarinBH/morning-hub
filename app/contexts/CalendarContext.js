@@ -11,6 +11,7 @@ export function CalendarProvider({ children }) {
   const [error, setError] = useState(null);
 
   const loadEvents = useCallback(async () => {
+    setError(null);
     try {
       const res = await fetch(API.calendar);
       const data = await res.json();

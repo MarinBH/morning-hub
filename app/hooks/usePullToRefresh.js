@@ -11,6 +11,7 @@ export function usePullToRefresh(onRefresh, { threshold = 80 } = {}) {
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(0);
   const pulling = useRef(false);
+  const pullDistanceRef = useRef(0);
 
   const onTouchStart = useCallback((e) => {
     // Only activate when scrolled to top
@@ -29,13 +30,15 @@ export function usePullToRefresh(onRefresh, { threshold = 80 } = {}) {
       return;
     }
     // Dampen the pull (feels more natural)
-    setPullDistance(Math.min(delta * 0.4, threshold + 20));
+    const dist = Math.min(delta * 0.4, threshold + 20);
+    pullDistanceRef.current = dist;
+    setPullDistance(dist);
   }, [threshold]);
 
   const onTouchEnd = useCallback(async () => {
     if (!pulling.current) return;
     pulling.current = false;
-    if (pullDistance >= threshold) {
+    if (pullDistanceRef.current >= threshold) {
       setRefreshing(true);
       setPullDistance(threshold * 0.5); // Hold at indicator position
       try {
@@ -47,7 +50,7 @@ export function usePullToRefresh(onRefresh, { threshold = 80 } = {}) {
     } else {
       setPullDistance(0);
     }
-  }, [pullDistance, threshold, onRefresh]);
+  }, [threshold, onRefresh]);
 
   return {
     refreshing,

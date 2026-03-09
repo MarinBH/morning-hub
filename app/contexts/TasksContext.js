@@ -12,6 +12,7 @@ export function TasksProvider({ children }) {
   const [error, setError] = useState(null);
 
   const loadTasks = useCallback(async () => {
+    setError(null);
     try {
       const [taskRes, projRes] = await Promise.all([
         fetch(API.todoistTasks),

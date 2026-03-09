@@ -46,12 +46,13 @@ export default function TaskEditor({ task, projects, onClose }) {
     const prevDomain = existingGoal?.domainId || null;
     const prevMilestone = existingGoal?.milestoneId || null;
     const prevImpact = existingGoal?.impactScore || 0;
-    if (selectedDomain !== prevDomain || selectedMilestone !== prevMilestone || impactScore !== prevImpact) {
+    const goalChanged = selectedDomain !== prevDomain || selectedMilestone !== prevMilestone || impactScore !== prevImpact;
+    if (goalChanged) {
       if (selectedDomain || impactScore > 0) {
         linkTask(task.id, {
-          domainId: selectedDomain || undefined,
-          milestoneId: selectedMilestone || undefined,
-          impactScore: impactScore || undefined,
+          domainId: selectedDomain || null,
+          milestoneId: selectedMilestone || null,
+          impactScore: impactScore || 0,
         });
       } else {
         unlinkTask(task.id);
@@ -80,25 +81,33 @@ export default function TaskEditor({ task, projects, onClose }) {
       });
 
       if (!res.ok) throw new Error('Failed to update task');
+      setSaving(false);
       onClose();
+      return;
     } catch {
-      // Rollback
+      // Rollback Todoist fields
       updateTask(task.id, {
         content: task.content,
         description: task.description || '',
         priority: task.priority,
         due: task.due || null,
       });
+      // Rollback goal link if it was changed
+      if (goalChanged) {
+        if (prevDomain || prevImpact > 0) {
+          linkTask(task.id, {
+            domainId: prevDomain,
+            milestoneId: prevMilestone,
+            impactScore: prevImpact,
+          });
+        } else {
+          unlinkTask(task.id);
+        }
+      }
       setError('Could not update task. Try again.');
       setSaving(false);
-      // Re-enable save after 1s
-      clearTimeout(saveTimerRef.current);
-      saveTimerRef.current = setTimeout(() => setSaving(false), 1000);
-      return;
     }
-
-    setSaving(false);
-  }, [content, description, priority, dueDate, task, updateTask, onClose]);
+  }, [content, description, priority, dueDate, task, updateTask, onClose, selectedDomain, selectedMilestone, impactScore, existingGoal, linkTask, unlinkTask]);
 
   const priorities = [
     { value: 4, label: 'P1', color: colors.p1 },

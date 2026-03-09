@@ -67,7 +67,7 @@ export default function TaskCard({ task, projects, completing, onComplete, onExp
           {overdue && <Badge color={colors.danger} bg={colors.dangerBg}>overdue</Badge>}
           {impactScore > 0 && (
             <span style={{ fontSize: 11, color: colors.warning, letterSpacing: -1 }}>
-              {'\u2605'.repeat(impactScore)}{'\u2606'.repeat(5 - impactScore)}
+              {'\u2605'.repeat(Math.min(Math.max(impactScore, 0), 5))}{'\u2606'.repeat(Math.max(5 - impactScore, 0))}
             </span>
           )}
         </div>

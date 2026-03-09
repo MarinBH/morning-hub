@@ -89,7 +89,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
                   </span>
                   {impact > 0 && (
                     <span style={{ fontSize: 10, color: colors.warning, letterSpacing: -1 }}>
-                      {'\u2605'.repeat(impact)}
+                      {'\u2605'.repeat(Math.min(Math.max(impact, 0), 5))}
                     </span>
                   )}
                 </div>

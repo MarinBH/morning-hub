@@ -2,10 +2,11 @@
 import { colors, radius } from '../../lib/theme';
 import { HABITS } from '../../lib/constants';
 
-export default function HabitList({ habits, onToggle, compact = false }) {
+export default function HabitList({ habits, onToggle, compact = false, habitDefs }) {
+  const defs = habitDefs || HABITS;
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-      {HABITS.map((h) => {
+      {defs.map((h) => {
         const done = habits.includes(h.id);
         return (
           <button

@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { colors, spacing } from './lib/theme';
 import { loadLocal, saveLocal, todayKey } from './lib/utils';
 import { useTodayState } from './hooks/useTodayState';
+import { useHabitConfig } from './hooks/useHabitConfig';
 import { usePullToRefresh } from './hooks/usePullToRefresh';
 import { TasksProvider, useTasks } from './contexts/TasksContext';
 import { CalendarProvider, useCalendarEvents } from './contexts/CalendarContext';
@@ -29,7 +30,8 @@ export default function CommandCenter() {
     if (typeof window === 'undefined') return false;
     return loadLocal(`hub-committed-${todayKey()}`, false);
   });
-  const { habits, journal, captures, breathworkDone, loaded, momentumScore, streakDays, toggleHabit, setJournal, addCapture, setBreathworkDone } = useTodayState();
+  const habitConfig = useHabitConfig();
+  const { habits, journal, captures, breathworkDone, loaded, momentumScore, streakDays, toggleHabit, setJournal, addCapture, setBreathworkDone } = useTodayState(habitConfig.habits.length || undefined);
 
   const handleCommit = useCallback(() => {
     setCommitted(true);
@@ -68,6 +70,7 @@ export default function CommandCenter() {
           setJournal={setJournal}
           addCapture={addCapture}
           setBreathworkDone={setBreathworkDone}
+          habitConfig={habitConfig}
         />
         </ErrorBoundary>
         </WheelOfLifeProvider>
@@ -80,7 +83,7 @@ export default function CommandCenter() {
 function AppShell({
   tab, setTab, captureOpen, setCaptureOpen, paletteOpen, setPaletteOpen,
   committed, onCommit, habits, journal, captures, breathworkDone, momentumScore, streakDays,
-  toggleHabit, setJournal, addCapture, setBreathworkDone,
+  toggleHabit, setJournal, addCapture, setBreathworkDone, habitConfig,
 }) {
   const { refetch: refetchTasks } = useTasks();
   const { refetch: refetchCalendar } = useCalendarEvents();
@@ -147,6 +150,7 @@ function AppShell({
                 onNavigate={setTab}
                 committed={committed}
                 onCommit={onCommit}
+                habitConfig={habitConfig}
               />
             )}
             {t === 'tasks' && <TasksPanel />}
@@ -156,6 +160,7 @@ function AppShell({
                 journalEntry={journal}
                 onHabitToggle={toggleHabit}
                 onJournalChange={setJournal}
+                habitConfig={habitConfig}
               />
             )}
             {t === 'goals' && <GoalsPanel />}

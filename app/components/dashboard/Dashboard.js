@@ -16,14 +16,15 @@ import HabitList from '../practice/HabitList';
 import BreathworkSection from '../practice/BreathworkSection';
 import JournalEntry from '../practice/JournalEntry';
 
-export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit }) {
+export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig }) {
   const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
   const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
   const [practiceOpen, setPracticeOpen] = useState(true);
 
+  const habitDefs = habitConfig?.habits?.length > 0 ? habitConfig.habits : HABITS;
   const completedHabits = habits.length;
-  const totalHabits = HABITS.length;
-  const habitProgress = (completedHabits / totalHabits) * 100;
+  const totalHabits = habitDefs.length;
+  const habitProgress = totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
   const prompt = getPrompt();
 
   const nextEvent = events[0];
@@ -155,7 +156,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         style={{ marginBottom: spacing.lg }}
       >
         <div style={{ marginBottom: spacing.xl }}>
-          <HabitList habits={habits} onToggle={onHabitToggle} compact />
+          <HabitList habits={habits} onToggle={onHabitToggle} habitDefs={habitDefs} compact />
         </div>
         <div style={{ marginBottom: spacing.xl }}>
           <BreathworkSection label="4-4-6" compact />

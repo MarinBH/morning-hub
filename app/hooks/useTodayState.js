@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { todayKey, loadLocal, saveLocal } from '../lib/utils';
 import { STORAGE_KEYS, HABITS } from '../lib/constants';
 
-export function useTodayState() {
+export function useTodayState(totalHabitsOverride) {
   const [habits, setHabits] = useState([]);
   const [journal, setJournal] = useState('');
   const [captures, setCaptures] = useState([]);
@@ -39,8 +39,9 @@ export function useTodayState() {
   const addCapture = (capture) => setCaptures((p) => [...p, capture]);
 
   // Momentum score — habits 50%, journal 25%, breathwork 25%
+  const totalHabits = totalHabitsOverride || HABITS.length;
   const momentumScore = Math.round(
-    (habits.length / HABITS.length) * 50 +
+    (totalHabits > 0 ? (habits.length / totalHabits) * 50 : 0) +
     (journal ? 25 : 0) +
     (breathworkDone ? 25 : 0)
   );

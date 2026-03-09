@@ -1,66 +1,75 @@
 'use client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { colors, radius, spacing, typography } from '../../lib/theme';
-import { isTaskOverdue } from '../../lib/utils';
-import { PRIORITY_COLORS, API } from '../../lib/constants';
+import { API } from '../../lib/constants';
 import { useTasks } from '../../contexts/TasksContext';
-import Badge from '../common/Badge';
+import KanbanView from './KanbanView';
+import QuickAdd from './QuickAdd';
 
 export default function TasksPanel() {
-  const { tasks, projects, loading, error, removeTask } = useTasks();
+  const { allTasks, projects, loading, error, removeTask, addTask } = useTasks();
   const [completing, setCompleting] = useState(new Set());
   const [completeError, setCompleteError] = useState(null);
+  const [undoTask, setUndoTask] = useState(null);
+  const undoTimerRef = useRef(null);
+  const [expanded, setExpanded] = useState(null);
 
-  const completeTask = useCallback(async (taskId) => {
+  const completeTask = useCallback((taskId) => {
+    const task = allTasks.find((t) => t.id === taskId);
     setCompleting((prev) => new Set(prev).add(taskId));
+    setUndoTask(task);
     setCompleteError(null);
-    try {
-      const res = await fetch(API.todoist, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ taskId, action: 'complete' }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to complete task');
-      }
-      setTimeout(() => {
-        removeTask(taskId);
-        setCompleting((prev) => {
-          const n = new Set(prev);
-          n.delete(taskId);
-          return n;
+
+    clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = setTimeout(async () => {
+      setUndoTask(null);
+      try {
+        const res = await fetch(API.todoist, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskId, action: 'complete' }),
         });
-      }, 600);
-    } catch {
+        if (!res.ok) throw new Error('Failed to complete task');
+        removeTask(taskId);
+      } catch {
+        setCompleteError('Could not complete task. Please try again.');
+        setTimeout(() => setCompleteError(null), 3000);
+      }
       setCompleting((prev) => {
         const n = new Set(prev);
         n.delete(taskId);
         return n;
       });
-      setCompleteError('Could not complete task. Please try again.');
-      setTimeout(() => setCompleteError(null), 3000);
+    }, 3000);
+  }, [allTasks, removeTask]);
+
+  const handleUndo = useCallback(() => {
+    clearTimeout(undoTimerRef.current);
+    if (undoTask) {
+      setCompleting((prev) => {
+        const n = new Set(prev);
+        n.delete(undoTask.id);
+        return n;
+      });
+      setUndoTask(null);
     }
-  }, [removeTask]);
+  }, [undoTask]);
 
   return (
-    <div style={{ padding: `0 ${spacing.xl}px 100px` }}>
+    <div style={{ padding: `0 ${spacing.xl}px 100px`, display: 'flex', flexDirection: 'column' }}>
       <div style={{ marginBottom: spacing.xxl }}>
-        <div style={typography.label}>TODAY&apos;S TASKS</div>
+        <div style={typography.label}>TASKS</div>
         <div style={{ fontSize: 14, color: colors.textDim }}>
-          {loading ? 'Loading...' : `${tasks.length} tasks \u00B7 tap to complete`}
+          {loading ? 'Loading...' : `${allTasks.length} total tasks`}
         </div>
       </div>
 
       {error && (
-        <div
-          style={{
-            padding: `${spacing.lg}px 18px`,
-            background: colors.dangerBg,
-            borderRadius: radius.md,
-            border: `1px solid ${colors.dangerBorder}`,
-            marginBottom: spacing.lg,
-          }}
-        >
+        <div style={{
+          padding: `${spacing.lg}px 18px`, background: colors.dangerBg,
+          borderRadius: radius.md, border: `1px solid ${colors.dangerBorder}`,
+          marginBottom: spacing.lg,
+        }}>
           <div style={{ fontSize: 13, color: colors.danger }}>{'\u26A0\uFE0F'} Could not connect to Todoist</div>
           <div style={{ fontSize: 12, color: colors.textDim, marginTop: 4 }}>
             Pull down to refresh or check your connection
@@ -75,86 +84,105 @@ export default function TasksPanel() {
       )}
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 40, color: colors.textFaint }}>
-          Loading tasks...
-        </div>
+        <div style={{ textAlign: 'center', padding: 40, color: colors.textFaint }}>Loading tasks...</div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {tasks.map((task) => {
-            const done = completing.has(task.id);
-            const overdue = isTaskOverdue(task);
-            return (
-              <div
-                key={task.id}
-                onClick={() => !done && completeTask(task.id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 14,
-                  background: done ? 'rgba(108,255,184,0.04)' : colors.bgCard,
-                  borderRadius: radius.md,
-                  padding: `${spacing.md}px ${spacing.lg}px`,
-                  cursor: 'pointer',
-                  transition: 'all 0.5s',
-                  opacity: done ? 0.3 : 1,
-                  transform: done ? 'translateX(20px)' : 'none',
-                }}
-              >
-                <div
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 7,
-                    flexShrink: 0,
-                    border: done
-                      ? `2px solid ${colors.success}`
-                      : `2px solid ${PRIORITY_COLORS[task.priority] || PRIORITY_COLORS[1]}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: done ? 'rgba(108,255,184,0.15)' : 'transparent',
-                    transition: 'all 0.3s',
-                  }}
-                >
-                  {done && (
-                    <span style={{ fontSize: 13, color: colors.success }}>{'\u2713'}</span>
-                  )}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: 15,
-                      lineHeight: 1.4,
-                      color: done ? colors.textDim : colors.text,
-                      textDecoration: done ? 'line-through' : 'none',
-                    }}
-                  >
-                    {task.content}
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, marginTop: 4, alignItems: 'center' }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: colors.textGhost,
-                        textTransform: 'uppercase',
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      {projects[task.project_id] || 'Inbox'}
-                    </span>
-                    {overdue && <Badge color={colors.danger} bg={colors.dangerBg}>overdue</Badge>}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-          {tasks.length === 0 && !error && (
-            <div style={{ textAlign: 'center', padding: 40, color: colors.textFaint }}>
-              All clear for today! {'\u{1F389}'}
+        <KanbanView
+          allTasks={allTasks}
+          projects={projects}
+          completing={completing}
+          onComplete={completeTask}
+          onExpand={setExpanded}
+        />
+      )}
+
+      {/* Expanded task detail */}
+      {expanded && (
+        <div
+          onClick={() => setExpanded(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 480,
+              background: colors.bgElevated,
+              borderRadius: `${radius.lg}px ${radius.lg}px 0 0`,
+              padding: `${spacing.xxl}px ${spacing.xl}px ${spacing.xxxl}px`,
+            }}
+          >
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: colors.textGhost, margin: '0 auto 20px' }} />
+            <div style={{ fontSize: 18, fontWeight: 600, color: colors.text, marginBottom: spacing.md }}>
+              {expanded.content}
             </div>
-          )}
+            {expanded.description && (
+              <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.lg, lineHeight: 1.5 }}>
+                {expanded.description}
+              </div>
+            )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm, fontSize: 13 }}>
+              {expanded.due?.date && (
+                <span style={{ padding: '6px 12px', borderRadius: radius.full, background: colors.bgCard, color: colors.textMuted }}>
+                  {'\u{1F4C5}'} {expanded.due.date}
+                </span>
+              )}
+              <span style={{ padding: '6px 12px', borderRadius: radius.full, background: colors.bgCard, color: colors.textMuted }}>
+                {'\u{1F4C1}'} {projects[expanded.project_id] || 'Inbox'}
+              </span>
+              {expanded.priority > 1 && (
+                <span style={{ padding: '6px 12px', borderRadius: radius.full, background: colors.bgCard, color: colors.textMuted }}>
+                  P{5 - expanded.priority}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => setExpanded(null)}
+              style={{
+                width: '100%', marginTop: spacing.xl, padding: `${spacing.md}px`,
+                borderRadius: radius.sm, border: `1px solid ${colors.borderActive}`,
+                background: 'transparent', color: colors.textDim,
+                fontSize: 14, cursor: 'pointer', minHeight: 44,
+              }}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
+
+      {/* Undo toast */}
+      {undoTask && (
+        <div style={{
+          position: 'fixed', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+          width: 'calc(100% - 40px)', maxWidth: 440,
+          padding: `${spacing.md}px ${spacing.lg}px`,
+          background: colors.bgElevated,
+          borderRadius: radius.md, border: `1px solid ${colors.borderActive}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.4)', zIndex: 150,
+          animation: 'fadeUp 0.2s ease',
+        }}>
+          <span style={{ fontSize: 14, color: colors.text }}>
+            {'\u2713'} Task completed
+          </span>
+          <button
+            onClick={handleUndo}
+            style={{
+              padding: `${spacing.sm}px ${spacing.lg}px`,
+              borderRadius: radius.sm, border: 'none',
+              background: colors.primaryBg, color: colors.primary,
+              fontSize: 13, fontWeight: 600, cursor: 'pointer', minHeight: 36,
+            }}
+          >
+            Undo
+          </button>
+        </div>
+      )}
+
+      <QuickAdd onTaskAdded={addTask} />
     </div>
   );
 }

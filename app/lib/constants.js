@@ -77,6 +77,7 @@ export const STORAGE_KEYS = {
 export const API = {
   calendar: '/api/calendar',
   todoistTasks: '/api/todoist?endpoint=tasks&filter=today%7Coverdue',
+  todoistAllTasks: '/api/todoist?endpoint=tasks&filter=all',
   todoistProjects: '/api/todoist?endpoint=projects',
   todoist: '/api/todoist',
 };

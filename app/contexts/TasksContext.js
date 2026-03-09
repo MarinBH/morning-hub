@@ -1,12 +1,12 @@
 'use client';
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { filterSystemTasks } from '../lib/utils';
+import { filterSystemTasks, todayKey } from '../lib/utils';
 import { API } from '../lib/constants';
 
 const TasksContext = createContext(null);
 
 export function TasksProvider({ children }) {
-  const [tasks, setTasks] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
   const [projects, setProjects] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +15,7 @@ export function TasksProvider({ children }) {
     setError(null);
     try {
       const [taskRes, projRes] = await Promise.all([
-        fetch(API.todoistTasks),
+        fetch(API.todoistAllTasks),
         fetch(API.todoistProjects),
       ]);
       const taskData = await taskRes.json();
@@ -40,7 +40,7 @@ export function TasksProvider({ children }) {
         return aDate.localeCompare(bDate);
       });
 
-      setTasks(sorted);
+      setAllTasks(sorted);
       setLoading(false);
     } catch (err) {
       setError(err.message);
@@ -53,11 +53,31 @@ export function TasksProvider({ children }) {
   }, [loadTasks]);
 
   const removeTask = useCallback((taskId) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    setAllTasks((prev) => prev.filter((t) => t.id !== taskId));
   }, []);
 
+  const addTask = useCallback((task) => {
+    setAllTasks((prev) => [task, ...prev]);
+  }, []);
+
+  // Backwards-compatible: "tasks" = today + overdue only
+  const today = todayKey();
+  const tasks = allTasks.filter((t) => {
+    const due = t.due?.date;
+    return due && due <= today;
+  });
+
   return (
-    <TasksContext.Provider value={{ tasks, projects, loading, error, refetch: loadTasks, removeTask }}>
+    <TasksContext.Provider value={{
+      tasks,
+      allTasks,
+      projects,
+      loading,
+      error,
+      refetch: loadTasks,
+      removeTask,
+      addTask,
+    }}>
       {children}
     </TasksContext.Provider>
   );

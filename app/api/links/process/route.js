@@ -1,4 +1,4 @@
-import { detectUrlType } from "../../../../lib/extractors/detect.js";
+import { detectUrlType, normalizeUrl } from "../../../../lib/extractors/detect.js";
 import { extractYouTube, formatTranscriptText } from "../../../../lib/extractors/youtube.js";
 import { extractArticle } from "../../../../lib/extractors/article.js";
 import { summarizeContent } from "../../../../lib/ai/summarize.js";
@@ -17,12 +17,15 @@ export async function POST(request) {
       }
 
       try {
-        const { url } = await request.json();
-        if (!url) {
+        const body = await request.json();
+        if (!body.url) {
           send("error", { message: "URL is required" });
           controller.close();
           return;
         }
+
+        // Normalize URL (mobile → desktop, strip tracking params)
+        const url = normalizeUrl(body.url);
 
         // Check for duplicates
         const existing = findItemByUrl(url);

@@ -28,12 +28,14 @@ export function TasksProvider({ children }) {
       }
 
       const projMap = {};
-      (projData.results || []).forEach((p) => {
+      const projList = Array.isArray(projData) ? projData : (projData.results || []);
+      projList.forEach((p) => {
         projMap[p.id] = p.name;
       });
       setProjects(projMap);
 
-      const sorted = filterSystemTasks(taskData.results || []).sort((a, b) => {
+      const taskList = Array.isArray(taskData) ? taskData : (taskData.results || []);
+      const sorted = filterSystemTasks(taskList).sort((a, b) => {
         if (a.priority !== b.priority) return b.priority - a.priority;
         const aDate = a.due?.date || '9999';
         const bDate = b.due?.date || '9999';

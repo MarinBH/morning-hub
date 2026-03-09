@@ -16,13 +16,13 @@ export function usePullToRefresh(onRefresh, { threshold = 80 } = {}) {
   const onTouchStart = useCallback((e) => {
     // Only activate when scrolled to top
     const el = e.currentTarget;
-    if (el.scrollTop > 0 || refreshing) return;
+    if (el.scrollTop > 0 || refreshing || !e.touches?.[0]) return;
     startY.current = e.touches[0].clientY;
     pulling.current = true;
   }, [refreshing]);
 
   const onTouchMove = useCallback((e) => {
-    if (!pulling.current) return;
+    if (!pulling.current || !e.touches?.[0]) return;
     const delta = e.touches[0].clientY - startY.current;
     if (delta < 0) {
       pulling.current = false;

@@ -114,6 +114,7 @@ export default function CaptureModal({ open, onClose, onCapture, onKnowledgeCapt
 
     const capture = { text: text.trim(), destination: dest, timestamp: new Date().toISOString() };
 
+    let taskError = false;
     if (dest === 'task') {
       try {
         const res = await fetch(API.todoist, {
@@ -126,12 +127,13 @@ export default function CaptureModal({ open, onClose, onCapture, onKnowledgeCapt
         onTaskAdded?.(newTask);
       } catch {
         setSubmitError('Could not create task in Todoist. Saved locally.');
+        taskError = true;
       }
     }
 
     onCapture(capture);
     setText('');
-    if (!submitError) onClose();
+    if (!taskError) onClose();
   };
 
   if (!open) return null;

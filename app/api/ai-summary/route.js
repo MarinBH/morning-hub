@@ -85,8 +85,9 @@ ${actualContent.slice(0, 6000)}`;
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
 
-    // Parse JSON from response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    // Parse JSON from response — strip markdown code fences if present
+    const stripped = text.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '');
+    const jsonMatch = stripped.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       // Fallback: return raw text as a basic summary
       return Response.json({
@@ -95,7 +96,7 @@ ${actualContent.slice(0, 6000)}`;
         category: 'Other',
         tags: [],
         actionItems: [],
-        contentType: 'note',
+        contentType: type === 'url' ? 'other' : 'note',
       });
     }
 

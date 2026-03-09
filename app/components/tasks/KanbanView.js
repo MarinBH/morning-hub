@@ -53,12 +53,14 @@ export default function KanbanView({ allTasks, projects, completing, onComplete,
   const touchStartYRef = useRef(null);
 
   const handleTouchStart = (e) => {
+    if (!e.touches?.[0]) return;
     touchStartRef.current = e.touches[0].clientX;
     touchStartYRef.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e) => {
     if (touchStartRef.current === null) return;
+    if (!e.changedTouches?.[0]) return;
     const diffX = touchStartRef.current - e.changedTouches[0].clientX;
     const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
     touchStartRef.current = null;

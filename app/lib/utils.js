@@ -58,7 +58,7 @@ const SYSTEM_TASK_PREFIXES = [
 
 export function filterSystemTasks(tasks) {
   return tasks.filter(
-    (t) => !SYSTEM_TASK_PREFIXES.some((prefix) => t.content.startsWith(prefix))
+    (t) => t.content && !SYSTEM_TASK_PREFIXES.some((prefix) => t.content.startsWith(prefix))
   );
 }
 

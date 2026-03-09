@@ -51,11 +51,13 @@ export default function MorningFlow({
       touchStartRef.current = null;
       return;
     }
+    if (!e.touches?.[0]) return;
     touchStartRef.current = e.touches[0].clientX;
   };
 
   const handleTouchEnd = (e) => {
     if (touchStartRef.current === null) return;
+    if (!e.changedTouches?.[0]) return;
     const diff = touchStartRef.current - e.changedTouches[0].clientX;
     touchStartRef.current = null;
     if (Math.abs(diff) > 50) {

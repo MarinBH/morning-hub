@@ -17,8 +17,10 @@ export async function GET(request) {
 
   try {
     const url = endpoint === "tasks"
-      ? `https://api.todoist.com/api/v1/tasks?filter=${encodeURIComponent(filter)}`
-      : `https://api.todoist.com/api/v1/projects`;
+      ? (filter && filter !== 'all'
+          ? `https://api.todoist.com/rest/v2/tasks?filter=${encodeURIComponent(filter)}`
+          : `https://api.todoist.com/rest/v2/tasks`)
+      : `https://api.todoist.com/rest/v2/projects`;
 
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },

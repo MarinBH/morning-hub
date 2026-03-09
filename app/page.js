@@ -5,6 +5,7 @@ import { loadLocal, saveLocal, todayKey } from './lib/utils';
 import { useTodayState } from './hooks/useTodayState';
 import { useHabitConfig } from './hooks/useHabitConfig';
 import { usePullToRefresh } from './hooks/usePullToRefresh';
+import { useKnowledge } from './hooks/useKnowledge';
 import { TasksProvider, useTasks } from './contexts/TasksContext';
 import { CalendarProvider, useCalendarEvents } from './contexts/CalendarContext';
 import { WheelOfLifeProvider } from './contexts/WheelOfLifeContext';
@@ -31,6 +32,7 @@ export default function CommandCenter() {
     return loadLocal(`hub-committed-${todayKey()}`, false);
   });
   const habitConfig = useHabitConfig();
+  const knowledge = useKnowledge();
   const { habits, journal, captures, breathworkDone, loaded, momentumScore, streakDays, toggleHabit, setJournal, addCapture, setBreathworkDone } = useTodayState(habitConfig.habits.length || undefined);
 
   const handleCommit = useCallback(() => {
@@ -71,6 +73,7 @@ export default function CommandCenter() {
           addCapture={addCapture}
           setBreathworkDone={setBreathworkDone}
           habitConfig={habitConfig}
+          knowledge={knowledge}
         />
         </ErrorBoundary>
         </WheelOfLifeProvider>
@@ -83,7 +86,7 @@ export default function CommandCenter() {
 function AppShell({
   tab, setTab, captureOpen, setCaptureOpen, paletteOpen, setPaletteOpen,
   committed, onCommit, habits, journal, captures, breathworkDone, momentumScore, streakDays,
-  toggleHabit, setJournal, addCapture, setBreathworkDone, habitConfig,
+  toggleHabit, setJournal, addCapture, setBreathworkDone, habitConfig, knowledge,
 }) {
   const { refetch: refetchTasks } = useTasks();
   const { refetch: refetchCalendar } = useCalendarEvents();
@@ -153,6 +156,7 @@ function AppShell({
                 habitConfig={habitConfig}
                 onBreathworkDone={() => setBreathworkDone(true)}
                 streakDays={streakDays}
+                knowledge={knowledge}
               />
             )}
             {t === 'tasks' && <TasksPanel />}
@@ -210,6 +214,7 @@ function AppShell({
         open={captureOpen}
         onClose={() => setCaptureOpen(false)}
         onCapture={addCapture}
+        onKnowledgeCapture={knowledge.addItem}
       />
     </div>
   );

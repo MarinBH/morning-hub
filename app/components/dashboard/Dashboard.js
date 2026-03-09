@@ -11,8 +11,9 @@ import Badge from '../common/Badge';
 import WheelOfLife from '../common/WheelOfLife';
 import { SkeletonCard } from '../common/Skeleton';
 import MorningFlow from '../practice/MorningFlow';
+import KnowledgeCard from '../knowledge/KnowledgeCard';
 
-export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig, onBreathworkDone, streakDays }) {
+export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig, onBreathworkDone, streakDays, knowledge }) {
   const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
   const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
 
@@ -209,21 +210,28 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         <WheelOfLifeMini onNavigate={onNavigate} />
       </Card>
 
-      {/* Knowledge Placeholder */}
+      {/* Knowledge */}
       <Card
         title="Knowledge"
-        subtitle="Capture links, articles, and ideas"
+        subtitle={knowledge?.items?.length > 0 ? `${knowledge.items.length} items` : 'Capture links, articles, and ideas'}
         icon={'\u{1F4DA}'}
         style={{ marginBottom: spacing.lg }}
       >
-        <div
-          onClick={() => onNavigate('knowledge')}
-          style={{ padding: `${spacing.xl}px`, textAlign: 'center', cursor: 'pointer' }}
-        >
-          <div style={{ fontSize: 32, marginBottom: spacing.sm }}>{'\u{1F9E0}'}</div>
-          <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.sm }}>Your personal knowledge base</div>
-          <div style={{ fontSize: 13, color: colors.primary, fontWeight: 500 }}>Start capturing {'\u2192'}</div>
-        </div>
+        {knowledge?.items?.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
+            {knowledge.items.slice(0, 3).map((item) => (
+              <KnowledgeCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: `${spacing.xl}px`, textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: spacing.sm }}>{'\u{1F9E0}'}</div>
+            <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.sm }}>Your personal knowledge base</div>
+            <div style={{ fontSize: 13, color: colors.primary, fontWeight: 500 }}>
+              Use the + button to capture {'\u2192'}
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

@@ -21,7 +21,7 @@ export function useKnowledge() {
 
   const addItem = useCallback((item) => {
     setItems((prev) => {
-      const updated = [{ ...item, id: `k-${Date.now()}`, createdAt: new Date().toISOString() }, ...prev];
+      const updated = [{ ...item, id: `k-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`, createdAt: new Date().toISOString() }, ...prev];
       saveLocal(STORAGE_KEY, updated);
       return updated;
     });

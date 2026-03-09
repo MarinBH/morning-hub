@@ -3,7 +3,7 @@ import { colors, radius, spacing } from '../../lib/theme';
 import BreathTimer from './BreathTimer';
 import { useState } from 'react';
 
-export default function BreathStep({ onComplete }) {
+export default function BreathStep({ onComplete, onSkip }) {
   const [started, setStarted] = useState(false);
 
   if (!started) {
@@ -29,7 +29,7 @@ export default function BreathStep({ onComplete }) {
         </button>
         <div style={{ marginTop: spacing.lg }}>
           <button
-            onClick={onComplete}
+            onClick={onSkip || onComplete}
             style={{
               background: 'none', border: 'none',
               color: colors.textFaint, fontSize: 13,

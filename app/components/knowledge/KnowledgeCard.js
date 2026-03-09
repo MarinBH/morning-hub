@@ -131,7 +131,7 @@ export default function KnowledgeCard({ item, onRemove }) {
 
           {onRemove && (
             <button
-              onClick={(e) => { e.stopPropagation(); onRemove(item.id); }}
+              onClick={(e) => { e.stopPropagation(); if (window.confirm('Remove this knowledge item?')) onRemove(item.id); }}
               style={{
                 background: 'none', border: 'none',
                 color: colors.textFaint, fontSize: 12,

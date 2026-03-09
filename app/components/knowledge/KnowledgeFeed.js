@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { colors, radius, spacing, fonts } from '../../lib/theme';
 import KnowledgeCard from './KnowledgeCard';
 
-const CATEGORIES = ['All', 'Health', 'Tech', 'Productivity', 'Business', 'Science', 'Finance', 'Learning', 'Lifestyle'];
+const CATEGORIES = ['All', 'Health', 'Tech', 'Productivity', 'Business', 'Science', 'Finance', 'Learning', 'Lifestyle', 'Other'];
 
 export default function KnowledgeFeed({ items, onRemove }) {
   const [filter, setFilter] = useState('All');

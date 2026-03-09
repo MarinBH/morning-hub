@@ -1,5 +1,5 @@
 'use client';
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { colors, spacing } from './lib/theme';
 import { loadLocal, saveLocal, todayKey } from './lib/utils';
 import { useTodayState } from './hooks/useTodayState';
@@ -29,15 +29,31 @@ export default function CommandCenter() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [committed, setCommitted] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return loadLocal(`hub-committed-${todayKey()}`, false);
+    const saved = loadLocal(`hub-committed-${todayKey()}`, false);
+    // Support both old (boolean) and new ({ committed, intention }) format
+    return saved === true || saved?.committed === true;
   });
   const habitConfig = useHabitConfig();
   const knowledge = useKnowledge();
-  const { habits, journal, captures, breathworkDone, loaded, momentumScore, streakDays, toggleHabit, setJournal, addCapture, setBreathworkDone } = useTodayState(habitConfig.habits.length || undefined);
 
-  const handleCommit = useCallback(() => {
+  // Shared MorningFlow state — one source of truth for Dashboard + Practice tab
+  const [flowStep, setFlowStep] = useState(0);
+  const [flowCelebrating, setFlowCelebrating] = useState(false);
+  const [flowCollapsed, setFlowCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = loadLocal(`hub-committed-${todayKey()}`, false);
+    return saved === true || saved?.committed === true;
+  });
+  const { habits, journal, captures, breathworkDone, breathworkSkipped, loaded, momentumScore, streakDays, toggleHabit, setJournal, addCapture, setBreathworkDone, setBreathworkSkipped, clearHabits } = useTodayState(habitConfig.habits.length || undefined);
+
+  // Wire pack change → clear orphaned habit IDs
+  useEffect(() => {
+    habitConfig.setOnPackChange?.(clearHabits);
+  }, [habitConfig.setOnPackChange, clearHabits]);
+
+  const handleCommit = useCallback((intention) => {
     setCommitted(true);
-    saveLocal(`hub-committed-${todayKey()}`, true);
+    saveLocal(`hub-committed-${todayKey()}`, { committed: true, intention: intention || '' });
   }, []);
 
   if (!loaded) {
@@ -155,8 +171,15 @@ function AppShell({
                 onCommit={onCommit}
                 habitConfig={habitConfig}
                 onBreathworkDone={() => setBreathworkDone(true)}
+                onBreathworkSkip={() => { setBreathworkDone(true); setBreathworkSkipped(true); }}
                 streakDays={streakDays}
                 knowledge={knowledge}
+                flowStep={flowStep}
+                setFlowStep={setFlowStep}
+                flowCelebrating={flowCelebrating}
+                setFlowCelebrating={setFlowCelebrating}
+                flowCollapsed={flowCollapsed}
+                setFlowCollapsed={setFlowCollapsed}
               />
             )}
             {t === 'tasks' && <TasksPanel />}
@@ -168,9 +191,16 @@ function AppShell({
                 onJournalChange={setJournal}
                 habitConfig={habitConfig}
                 onBreathworkDone={() => setBreathworkDone(true)}
+                onBreathworkSkip={() => { setBreathworkDone(true); setBreathworkSkipped(true); }}
                 committed={committed}
                 onCommit={onCommit}
                 streakDays={streakDays}
+                flowStep={flowStep}
+                setFlowStep={setFlowStep}
+                flowCelebrating={flowCelebrating}
+                setFlowCelebrating={setFlowCelebrating}
+                flowCollapsed={flowCollapsed}
+                setFlowCollapsed={setFlowCollapsed}
               />
             )}
             {t === 'goals' && <GoalsPanel />}
@@ -215,6 +245,7 @@ function AppShell({
         onClose={() => setCaptureOpen(false)}
         onCapture={addCapture}
         onKnowledgeCapture={knowledge.addItem}
+        onTaskAdded={(task) => refetchTasks()}
       />
     </div>
   );

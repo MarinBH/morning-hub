@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { colors, radius, spacing, fonts } from '../../lib/theme';
 import { API, BOTTOM_NAV_HEIGHT } from '../../lib/constants';
 
-export default function QuickAdd({ onTaskAdded }) {
+export default function QuickAdd({ onTaskAdded, activeColumn }) {
   const [text, setText] = useState('');
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState(null);
@@ -17,7 +17,12 @@ export default function QuickAdd({ onTaskAdded }) {
       const res = await fetch(API.todoist, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', content: text.trim() }),
+        body: JSON.stringify({
+          action: 'add',
+          content: text.trim(),
+          ...(activeColumn === 'today' && { due_string: 'today' }),
+          ...(activeColumn === 'week' && { due_string: 'this week' }),
+        }),
       });
       if (!res.ok) throw new Error('Failed to add task');
       const task = await res.json();

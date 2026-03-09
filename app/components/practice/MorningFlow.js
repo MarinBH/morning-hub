@@ -14,12 +14,22 @@ const STEP_LABELS = ['Habits', 'Breathe', 'Journal', 'Commit'];
 export default function MorningFlow({
   habits, habitDefs, onHabitToggle,
   journalEntry, onJournalChange,
-  onBreathworkDone, committed, onCommit,
+  onBreathworkDone, onBreathworkSkip, committed, onCommit,
   streakDays, compact = false,
+  // External state (shared between Dashboard + Practice tab)
+  flowStep, setFlowStep, flowCelebrating, setFlowCelebrating, flowCollapsed, setFlowCollapsed,
 }) {
-  const [step, setStep] = useState(0);
-  const [celebrating, setCelebrating] = useState(false);
-  const [collapsed, setCollapsed] = useState(committed);
+  // Use external state if provided, otherwise fall back to local state
+  const [_localStep, _setLocalStep] = useState(0);
+  const [_localCelebrating, _setLocalCelebrating] = useState(false);
+  const [_localCollapsed, _setLocalCollapsed] = useState(committed);
+
+  const step = flowStep ?? _localStep;
+  const setStep = setFlowStep ?? _setLocalStep;
+  const celebrating = flowCelebrating ?? _localCelebrating;
+  const setCelebrating = setFlowCelebrating ?? _setLocalCelebrating;
+  const collapsed = flowCollapsed ?? _localCollapsed;
+  const setCollapsed = setFlowCollapsed ?? _setLocalCollapsed;
   const touchStartRef = useRef(null);
   const prompt = getPrompt();
 
@@ -34,8 +44,13 @@ export default function MorningFlow({
     if (step > 0) setStep(step - 1);
   }, [step]);
 
-  // Swipe handlers
+  // Swipe handlers — skip swipe when interacting with textarea/input (#15)
   const handleTouchStart = (e) => {
+    const tag = e.target.tagName;
+    if (tag === 'TEXTAREA' || tag === 'INPUT') {
+      touchStartRef.current = null;
+      return;
+    }
     touchStartRef.current = e.touches[0].clientX;
   };
 
@@ -59,6 +74,11 @@ export default function MorningFlow({
     goNext();
   };
 
+  const handleBreathSkip = () => {
+    onBreathworkSkip?.();
+    goNext();
+  };
+
   // Collapsed summary bar
   if (collapsed && committed) {
     return (
@@ -67,7 +87,7 @@ export default function MorningFlow({
         totalHabits={totalHabits}
         hasJournal={!!journalEntry}
         streakDays={streakDays}
-        onExpand={() => setCollapsed(false)}
+        onExpand={() => { setCollapsed(false); setStep(3); }}
       />
     );
   }
@@ -141,9 +161,10 @@ export default function MorningFlow({
             onToggle={onHabitToggle}
           />
         )}
-        {step === 1 && (
-          <BreathStep onComplete={handleBreathDone} />
-        )}
+        {/* BreathStep uses display:none to preserve timer state when navigating away (#17) */}
+        <div style={{ display: step === 1 ? 'block' : 'none' }}>
+          <BreathStep onComplete={handleBreathDone} onSkip={handleBreathSkip} />
+        </div>
         {step === 2 && (
           <JournalStep
             value={journalEntry}

@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { colors, radius, spacing, typography } from '../../lib/theme';
 import { getDateString, fmtTime } from '../../lib/utils';
 import { isTaskOverdue } from '../../lib/utils';
@@ -12,8 +13,10 @@ import WheelOfLife from '../common/WheelOfLife';
 import { SkeletonCard } from '../common/Skeleton';
 import MorningFlow from '../practice/MorningFlow';
 import KnowledgeCard from '../knowledge/KnowledgeCard';
+import KnowledgeFeed from '../knowledge/KnowledgeFeed';
 
-export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig, onBreathworkDone, streakDays, knowledge }) {
+export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig, onBreathworkDone, onBreathworkSkip, streakDays, knowledge, flowStep, setFlowStep, flowCelebrating, setFlowCelebrating, flowCollapsed, setFlowCollapsed }) {
+  const [showAllKnowledge, setShowAllKnowledge] = useState(false);
   const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
   const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
 
@@ -112,9 +115,16 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           journalEntry={journalEntry}
           onJournalChange={onJournalChange}
           onBreathworkDone={onBreathworkDone}
+          onBreathworkSkip={onBreathworkSkip}
           committed={committed}
           onCommit={onCommit}
           streakDays={streakDays}
+          flowStep={flowStep}
+          setFlowStep={setFlowStep}
+          flowCelebrating={flowCelebrating}
+          setFlowCelebrating={setFlowCelebrating}
+          flowCollapsed={flowCollapsed}
+          setFlowCollapsed={setFlowCollapsed}
           compact
         />
       </div>
@@ -215,12 +225,22 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
         title="Knowledge"
         subtitle={knowledge?.items?.length > 0 ? `${knowledge.items.length} items` : 'Capture links, articles, and ideas'}
         icon={'\u{1F4DA}'}
+        action={knowledge?.items?.length > 3 ? (
+          <button
+            onClick={() => setShowAllKnowledge(!showAllKnowledge)}
+            style={{ fontSize: 12, color: colors.primary, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}
+          >
+            {showAllKnowledge ? 'Show less' : `See all ${knowledge.items.length}`} {showAllKnowledge ? '\u2191' : '\u2192'}
+          </button>
+        ) : null}
         style={{ marginBottom: spacing.lg }}
       >
-        {knowledge?.items?.length > 0 ? (
+        {showAllKnowledge ? (
+          <KnowledgeFeed items={knowledge.items} onRemove={knowledge.removeItem} />
+        ) : knowledge?.items?.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
             {knowledge.items.slice(0, 3).map((item) => (
-              <KnowledgeCard key={item.id} item={item} />
+              <KnowledgeCard key={item.id} item={item} onRemove={knowledge.removeItem} />
             ))}
           </div>
         ) : (

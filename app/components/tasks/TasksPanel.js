@@ -13,6 +13,7 @@ export default function TasksPanel() {
   const [undoTask, setUndoTask] = useState(null);
   const undoTimerRef = useRef(null);
   const [expanded, setExpanded] = useState(null);
+  const [activeColumn, setActiveColumn] = useState('today');
 
   const completeTask = useCallback((taskId) => {
     const task = allTasks.find((t) => t.id === taskId);
@@ -92,6 +93,7 @@ export default function TasksPanel() {
           completing={completing}
           onComplete={completeTask}
           onExpand={setExpanded}
+          onColumnChange={setActiveColumn}
         />
       )}
 
@@ -182,7 +184,7 @@ export default function TasksPanel() {
         </div>
       )}
 
-      <QuickAdd onTaskAdded={addTask} />
+      <QuickAdd onTaskAdded={addTask} activeColumn={activeColumn} />
     </div>
   );
 }

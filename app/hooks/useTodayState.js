@@ -8,6 +8,7 @@ export function useTodayState(totalHabitsOverride) {
   const [journal, setJournal] = useState('');
   const [captures, setCaptures] = useState([]);
   const [breathworkDone, setBreathworkDone] = useState(false);
+  const [breathworkSkipped, setBreathworkSkipped] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef(null);
 
@@ -19,6 +20,7 @@ export function useTodayState(totalHabitsOverride) {
       setJournal(saved.journal || '');
       setCaptures(saved.captures || []);
       setBreathworkDone(saved.breathworkDone || false);
+      setBreathworkSkipped(saved.breathworkSkipped || false);
     }
     setLoaded(true);
   }, []);
@@ -28,22 +30,25 @@ export function useTodayState(totalHabitsOverride) {
     if (!loaded) return;
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveLocal(STORAGE_KEYS.dailyState(todayKey()), { habits, journal, captures, breathworkDone });
+      saveLocal(STORAGE_KEYS.dailyState(todayKey()), { habits, journal, captures, breathworkDone, breathworkSkipped });
     }, 500);
     return () => clearTimeout(saveTimerRef.current);
-  }, [habits, journal, captures, breathworkDone, loaded]);
+  }, [habits, journal, captures, breathworkDone, breathworkSkipped, loaded]);
 
   const toggleHabit = (id) =>
     setHabits((p) => (p.includes(id) ? p.filter((h) => h !== id) : [...p, id]));
 
   const addCapture = (capture) => setCaptures((p) => [...p, capture]);
 
+  // Clear habits when pack changes to avoid orphaned IDs
+  const clearHabits = useCallback(() => setHabits([]), []);
+
   // Momentum score — habits 50%, journal 25%, breathwork 25%
-  const totalHabits = totalHabitsOverride || HABITS.length;
+  const totalHabits = totalHabitsOverride ?? HABITS.length;
   const momentumScore = Math.round(
     (totalHabits > 0 ? (habits.length / totalHabits) * 50 : 0) +
     (journal ? 25 : 0) +
-    (breathworkDone ? 25 : 0)
+    (breathworkDone ? (breathworkSkipped ? 10 : 25) : 0)
   );
 
   // Streak — count consecutive days with at least 1 habit logged (memoized)
@@ -71,6 +76,7 @@ export function useTodayState(totalHabitsOverride) {
     journal,
     captures,
     breathworkDone,
+    breathworkSkipped,
     loaded,
     momentumScore,
     streakDays,
@@ -78,5 +84,7 @@ export function useTodayState(totalHabitsOverride) {
     setJournal,
     addCapture,
     setBreathworkDone,
+    setBreathworkSkipped,
+    clearHabits,
   };
 }

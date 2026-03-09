@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { loadLocal, saveLocal } from '../lib/utils';
 import { HABIT_PACKS, CUSTOM_PACK, getPackById } from '../lib/habitPacks';
 
@@ -8,6 +8,7 @@ const STORAGE_KEY = 'hub-habit-config';
 export function useHabitConfig() {
   const [config, setConfig] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  const onPackChangeRef = useRef(null);
 
   useEffect(() => {
     const saved = loadLocal(STORAGE_KEY, null);
@@ -25,6 +26,8 @@ export function useHabitConfig() {
     };
     setConfig(newConfig);
     saveLocal(STORAGE_KEY, newConfig);
+    // Clear completed habits from today state to avoid orphaned IDs
+    onPackChangeRef.current?.();
   }, []);
 
   const customizePack = useCallback((packId) => {
@@ -45,7 +48,7 @@ export function useHabitConfig() {
         packId: 'custom',
         habits: [
           ...(prev?.habits || []),
-          { id: `custom-${Date.now()}`, label, icon, custom: true },
+          { id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`, label, icon, custom: true },
         ],
       };
       saveLocal(STORAGE_KEY, updated);
@@ -81,6 +84,11 @@ export function useHabitConfig() {
   const habits = config?.habits || [];
   const packId = config?.packId || null;
 
+  // Register callback to clear habits when pack changes
+  const setOnPackChange = useCallback((cb) => {
+    onPackChangeRef.current = cb;
+  }, []);
+
   return {
     config,
     loaded,
@@ -92,5 +100,6 @@ export function useHabitConfig() {
     addHabit,
     removeHabit,
     updateHabit,
+    setOnPackChange,
   };
 }

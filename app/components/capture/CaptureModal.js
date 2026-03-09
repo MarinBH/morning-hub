@@ -10,7 +10,7 @@ const DESTINATIONS = [
   { id: 'knowledge', label: '\u{1F9E0} knowledge' },
 ];
 
-export default function CaptureModal({ open, onClose, onCapture, onKnowledgeCapture }) {
+export default function CaptureModal({ open, onClose, onCapture, onKnowledgeCapture, onTaskAdded }) {
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
   const [dest, setDest] = useState('inbox');
@@ -122,6 +122,8 @@ export default function CaptureModal({ open, onClose, onCapture, onKnowledgeCapt
           body: JSON.stringify({ action: 'add', content: text.trim() }),
         });
         if (!res.ok) throw new Error('Failed to create task');
+        const newTask = await res.json();
+        onTaskAdded?.(newTask);
       } catch {
         setSubmitError('Could not create task in Todoist. Saved locally.');
       }

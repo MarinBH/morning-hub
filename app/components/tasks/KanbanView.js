@@ -40,7 +40,7 @@ function categorizeTasks(allTasks) {
   return { inbox, today: todayTasks, week, backlog };
 }
 
-export default function KanbanView({ allTasks, projects, completing, onComplete, onExpand }) {
+export default function KanbanView({ allTasks, projects, completing, onComplete, onExpand, onColumnChange }) {
   const [activeCol, setActiveCol] = useState('today');
   const touchStartRef = useRef(null);
 
@@ -48,19 +48,30 @@ export default function KanbanView({ allTasks, projects, completing, onComplete,
 
   const currentIdx = COLUMNS.findIndex((c) => c.id === activeCol);
 
+  const touchStartYRef = useRef(null);
+
   const handleTouchStart = (e) => {
     touchStartRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
   };
 
   const handleTouchEnd = (e) => {
     if (touchStartRef.current === null) return;
-    const diff = touchStartRef.current - e.changedTouches[0].clientX;
+    const diffX = touchStartRef.current - e.changedTouches[0].clientX;
+    const diffY = touchStartYRef.current - e.changedTouches[0].clientY;
     touchStartRef.current = null;
-    if (Math.abs(diff) > 50) {
+    touchStartYRef.current = null;
+    // Only swipe if horizontal movement dominates vertical (#18)
+    const diff = diffX;
+    if (Math.abs(diffX) > 80 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
       if (diff > 0 && currentIdx < COLUMNS.length - 1) {
-        setActiveCol(COLUMNS[currentIdx + 1].id);
+        const newCol = COLUMNS[currentIdx + 1].id;
+        setActiveCol(newCol);
+        onColumnChange?.(newCol);
       } else if (diff < 0 && currentIdx > 0) {
-        setActiveCol(COLUMNS[currentIdx - 1].id);
+        const newCol = COLUMNS[currentIdx - 1].id;
+        setActiveCol(newCol);
+        onColumnChange?.(newCol);
       }
     }
   };
@@ -82,7 +93,7 @@ export default function KanbanView({ allTasks, projects, completing, onComplete,
           return (
             <button
               key={col.id}
-              onClick={() => setActiveCol(col.id)}
+              onClick={() => { setActiveCol(col.id); onColumnChange?.(col.id); }}
               style={{
                 flex: 1, padding: `${spacing.md}px ${spacing.sm}px`,
                 background: 'none', border: 'none',

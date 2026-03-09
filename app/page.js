@@ -106,6 +106,7 @@ function AppShell({
   tab, setTab, captureOpen, setCaptureOpen, paletteOpen, setPaletteOpen,
   committed, onCommit, habits, journal, captures, breathworkDone, momentumScore, streakDays,
   toggleHabit, setJournal, addCapture, setBreathworkDone, habitConfig, knowledge,
+  flowStep, setFlowStep, flowCelebrating, setFlowCelebrating, flowCollapsed, setFlowCollapsed,
 }) {
   const { refetch: refetchTasks } = useTasks();
   const { refetch: refetchCalendar } = useCalendarEvents();

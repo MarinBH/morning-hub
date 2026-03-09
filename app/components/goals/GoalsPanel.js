@@ -18,7 +18,7 @@ export default function GoalsPanel() {
       <div style={{ marginBottom: spacing.xxl }}>
         <div style={typography.label}>LIFE JOURNEYS</div>
         <div style={{ fontSize: 14, color: colors.textDim }}>
-          Balance score: {avgScore?.toFixed(1) || '0.0'}/10
+          Balance score: {avgScore || '0.0'}/10
         </div>
       </div>
 

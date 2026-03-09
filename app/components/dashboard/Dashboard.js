@@ -98,7 +98,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           </div>
         ) : previewTasks.length > 0 ? (
           <div style={{ fontSize: 14, color: colors.textMuted }}>
-            {previewTasks.length} tasks today {'\u2014'} no high-priority items flagged
+            {tasks.length} task{tasks.length !== 1 ? 's' : ''} today {'\u2014'} no high-priority items flagged
           </div>
         ) : (
           <div style={{ fontSize: 14, color: colors.textMuted }}>

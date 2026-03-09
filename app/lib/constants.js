@@ -40,6 +40,9 @@ export const PRIORITY_COLORS = {
   1: colors.p4,  // low
 };
 
+// Layout constants
+export const BOTTOM_NAV_HEIGHT = 70; // px, including safe area padding
+
 // localStorage keys
 export const STORAGE_KEYS = {
   dailyState: (date) => `hub-${date}`,

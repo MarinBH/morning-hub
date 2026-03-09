@@ -101,18 +101,21 @@ export default function GoalsPanel() {
                       <div
                         key={goal.id}
                         onClick={() => toggleGoal(area.id, goal.id)}
+                        role="checkbox"
+                        aria-checked={goal.done}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: spacing.sm,
                           padding: `${spacing.sm}px 0`,
+                          minHeight: 44,
                           cursor: 'pointer',
                         }}
                       >
                         <div
                           style={{
-                            width: 18,
-                            height: 18,
+                            width: 22,
+                            height: 22,
                             borderRadius: 5,
                             border: goal.done ? `2px solid ${colors.success}` : `2px solid ${colors.textGhost}`,
                             background: goal.done ? 'rgba(108,255,184,0.15)' : 'transparent',

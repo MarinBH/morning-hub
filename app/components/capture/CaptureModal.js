@@ -138,6 +138,7 @@ export default function CaptureModal({ open, onClose, onCapture }) {
         <div style={{ display: 'flex', gap: 10 }}>
           <button
             onClick={listening ? stopVoice : startVoice}
+            aria-label={listening ? 'Stop voice input' : 'Start voice input'}
             style={{
               width: 52, height: 52, borderRadius: '50%', cursor: 'pointer', fontSize: 22,
               display: 'flex', alignItems: 'center', justifyContent: 'center',

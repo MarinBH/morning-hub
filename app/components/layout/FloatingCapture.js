@@ -5,6 +5,7 @@ export default function FloatingCapture({ onClick }) {
   return (
     <button
       onClick={onClick}
+      aria-label="Quick capture"
       style={{
         position: 'fixed',
         bottom: 80,

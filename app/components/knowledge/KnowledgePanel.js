@@ -62,7 +62,8 @@ export default function KnowledgePanel({ captures = [] }) {
             key={t.id}
             onClick={() => setFilter(t.id)}
             style={{
-              padding: '6px 12px',
+              padding: '8px 14px',
+              minHeight: 36,
               borderRadius: radius.full,
               fontSize: 12,
               whiteSpace: 'nowrap',
@@ -129,11 +130,8 @@ export default function KnowledgePanel({ captures = [] }) {
         style={{ marginTop: spacing.xl }}
       >
         <div style={{ padding: spacing.lg, textAlign: 'center' }}>
-          <div style={{ fontSize: 13, color: colors.textDim, marginBottom: spacing.sm }}>
-            Create recurring searches that run on schedule
-          </div>
-          <div style={{ fontSize: 12, color: colors.textFaint }}>
-            {'\u{1F512}'} Available when Supabase is connected
+          <div style={{ fontSize: 13, color: colors.textDim }}>
+            Coming soon: create recurring searches that run on schedule
           </div>
         </div>
       </Card>

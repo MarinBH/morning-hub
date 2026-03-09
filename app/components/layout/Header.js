@@ -46,8 +46,8 @@ export default function Header({ momentumScore = 0, captureCount = 0, streakDays
         <button
           onClick={onSearchClick}
           style={{
-            width: 36,
-            height: 36,
+            width: 44,
+            height: 44,
             borderRadius: '50%',
             border: `1px solid ${colors.borderActive}`,
             background: 'transparent',

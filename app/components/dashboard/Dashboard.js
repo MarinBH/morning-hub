@@ -86,7 +86,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           </div>
         ) : (
           <div style={{ fontSize: 14, color: colors.textMuted }}>
-            No tasks loaded {'\u2014'} check Todoist connection
+            No tasks for today
           </div>
         )}
 

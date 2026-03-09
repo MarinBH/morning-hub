@@ -26,6 +26,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
         <button
           key={t.id}
           onClick={() => onTabChange(t.id)}
+          aria-label={t.label}
           style={{
             flex: 1,
             maxWidth: 100,
@@ -33,6 +34,7 @@ export default function BottomNav({ activeTab, onTabChange }) {
             flexDirection: 'column',
             alignItems: 'center',
             gap: 3,
+            minHeight: 44,
             padding: `${spacing.sm}px 0`,
             border: 'none',
             background: 'transparent',

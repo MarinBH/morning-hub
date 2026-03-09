@@ -61,9 +61,9 @@ export default function TasksPanel() {
             marginBottom: spacing.lg,
           }}
         >
-          <div style={{ fontSize: 13, color: colors.danger }}>{'\u26A0\uFE0F'} {error}</div>
+          <div style={{ fontSize: 13, color: colors.danger }}>{'\u26A0\uFE0F'} Could not connect to Todoist</div>
           <div style={{ fontSize: 12, color: colors.textDim, marginTop: 4 }}>
-            Check TODOIST_API_TOKEN in Vercel env vars
+            Pull down to refresh or check your connection
           </div>
         </div>
       )}

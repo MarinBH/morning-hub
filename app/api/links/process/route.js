@@ -2,8 +2,8 @@ import { detectUrlType, normalizeUrl } from "../../../../lib/extractors/detect.j
 import { extractYouTube, formatTranscriptText } from "../../../../lib/extractors/youtube.js";
 import { extractArticle } from "../../../../lib/extractors/article.js";
 import { summarizeContent } from "../../../../lib/ai/summarize.js";
-import { findItemByUrl, insertItem, linkItemTags, updateItem } from "../../../../lib/db.js";
-import { buildFilePath, saveFiles } from "../../../../lib/storage/files.js";
+import { findItemByUrl, insertItem, linkItemCategories } from "../../../../lib/db.js";
+import { saveFiles, slugify } from "../../../../lib/storage/files.js";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +89,7 @@ export async function POST(request) {
           summary = {
             summary: "AI summarization was not available. Raw content has been saved.",
             key_takeaways: [],
-            tags: { existing: ["Learning"], suggested_new: [] },
+            categories: [{ domain: "Personal Growth", category: "Learning Techniques" }],
           };
           itemStatus = "partial";
         }
@@ -101,16 +101,15 @@ export async function POST(request) {
         // Step 4: Save files + DB
         send("step", { step: "saving", status: "in_progress" });
 
-        const primaryTag = summary.tags?.existing?.[0] || "Learning";
-        const allTags = [
-          ...(summary.tags?.existing || []),
-          ...(summary.tags?.suggested_new || []),
-        ];
+        // Build category paths for file storage (files duplicated across categories)
+        const categories = summary.categories || [{ domain: "Personal Growth", category: "Learning Techniques" }];
+        const categoryPaths = categories.map(c => ({
+          domainSlug: slugify(c.domain),
+          categorySlug: slugify(c.category),
+        }));
 
-        const relativePath = buildFilePath(primaryTag, type, metadata.title || "untitled");
-
-        saveFiles({
-          relativePath,
+        const fileResult = saveFiles({
+          categoryPaths,
           type,
           metadata,
           summary,
@@ -128,33 +127,31 @@ export async function POST(request) {
           publish_date: metadata.publishedTime || null,
           reading_time: metadata.readingTime || null,
           summary_preview: (summary.summary || "").substring(0, 200),
-          file_path: relativePath,
+          file_path: fileResult.relativePath,
           status: itemStatus,
           error_message: itemStatus === "partial" ? "AI summarization failed" : null,
         });
 
-        const itemId = result.lastInsertRowid;
+        const itemId = Number(result.lastInsertRowid);
 
-        // Link tags
-        if (allTags.length > 0) {
-          linkItemTags(Number(itemId), allTags);
-        }
+        // Link categories (with domain context for proper filing)
+        linkItemCategories(itemId, categories);
 
         send("step", { step: "saving", status: "complete" });
 
         // Done
         send("done", {
           item: {
-            id: Number(itemId),
+            id: itemId,
             url,
             type,
             title: metadata.title,
             author: metadata.author || metadata.channel,
             thumbnail: metadata.thumbnail,
             summary_preview: (summary.summary || "").substring(0, 200),
-            tags: allTags,
+            categories,
             status: itemStatus,
-            file_path: relativePath,
+            file_path: fileResult.relativePath,
           },
         });
       } catch (err) {

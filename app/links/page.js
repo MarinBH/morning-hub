@@ -18,8 +18,9 @@ export default function LinksPage() {
   const [lastSaved, setLastSaved] = useState(null);
 
   const [items, setItems] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [activeTag, setActiveTag] = useState(null);
+  const [domains, setDomains] = useState([]);
+  const [activeDomain, setActiveDomain] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
   const [activeType, setActiveType] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [totalItems, setTotalItems] = useState(0);
@@ -31,15 +32,15 @@ export default function LinksPage() {
 
   const inputRef = useRef(null);
 
-  // Load items and tags on mount
   useEffect(() => {
     fetchItems();
-    fetchTags();
-  }, [activeTag, activeType]);
+    fetchDomains();
+  }, [activeDomain, activeCategory, activeType]);
 
   const fetchItems = useCallback(async () => {
     const params = new URLSearchParams();
-    if (activeTag) params.set("tag", activeTag);
+    if (activeCategory) params.set("category", activeCategory);
+    if (activeDomain && !activeCategory) params.set("domain", activeDomain);
     if (activeType) params.set("type", activeType);
     if (searchQuery) params.set("search", searchQuery);
 
@@ -51,19 +52,18 @@ export default function LinksPage() {
     } catch {
       console.error("Failed to fetch items");
     }
-  }, [activeTag, activeType, searchQuery]);
+  }, [activeDomain, activeCategory, activeType, searchQuery]);
 
-  const fetchTags = async () => {
+  const fetchDomains = async () => {
     try {
       const res = await fetch("/api/links/tags");
       const data = await res.json();
-      setTags(data.tags || []);
+      setDomains(data.domains || []);
     } catch {
-      console.error("Failed to fetch tags");
+      console.error("Failed to fetch domains");
     }
   };
 
-  // Search debounce
   useEffect(() => {
     const timer = setTimeout(() => fetchItems(), 300);
     return () => clearTimeout(timer);
@@ -132,7 +132,7 @@ export default function LinksPage() {
         setLastSaved(data.item);
         setUrl("");
         fetchItems();
-        fetchTags();
+        fetchDomains();
         break;
       case "error":
         setProcessError(data.message);
@@ -177,7 +177,6 @@ export default function LinksPage() {
     }
   };
 
-  // If detail view is open
   if (selectedItem) {
     return (
       <div className="min-h-screen bg-bg text-text font-sans">
@@ -191,6 +190,11 @@ export default function LinksPage() {
       </div>
     );
   }
+
+  // Count total items with categories for domain filter display
+  const domainsWithItems = domains.filter(d =>
+    d.categories?.some(c => c.item_count > 0)
+  );
 
   return (
     <div className="min-h-screen bg-bg text-text font-sans">
@@ -230,14 +234,12 @@ export default function LinksPage() {
             </button>
           </div>
 
-          {/* Duplicate warning */}
           {duplicate && (
             <div className="mt-2 bg-warning/10 border border-warning/20 rounded-lg px-3 py-2 text-sm text-warning">
-              Already saved: "{duplicate.existingItem.title}" — processing anyway
+              Already saved: &quot;{duplicate.existingItem.title}&quot; — processing anyway
             </div>
           )}
 
-          {/* Process error */}
           {processError && (
             <div className="mt-2 bg-error/10 border border-error/20 rounded-lg px-3 py-2 text-sm text-error">
               {processError}
@@ -278,10 +280,10 @@ export default function LinksPage() {
               <div>
                 <div className="text-sm text-success font-medium">Saved successfully</div>
                 <div className="text-text text-sm mt-1">{lastSaved.title}</div>
-                <div className="flex gap-1 mt-1">
-                  {lastSaved.tags?.map((tag) => (
-                    <span key={tag} className="text-xs bg-bg px-2 py-0.5 rounded-full text-text-muted">
-                      {tag}
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {lastSaved.categories?.map((cat, i) => (
+                    <span key={i} className="text-xs bg-bg px-2 py-0.5 rounded-full text-text-muted">
+                      {cat.category}
                     </span>
                   ))}
                 </div>
@@ -307,24 +309,59 @@ export default function LinksPage() {
             className="w-full bg-bg-input border border-border rounded-lg px-3 py-2 text-sm text-text placeholder:text-text-dim focus:border-border-focus focus:outline-none"
           />
 
-          {/* Tag filters */}
+          {/* Domain filters */}
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            <TagChip
+            <FilterChip
               label="All"
-              active={!activeTag}
-              onClick={() => setActiveTag(null)}
+              active={!activeDomain}
+              onClick={() => { setActiveDomain(null); setActiveCategory(null); }}
             />
-            {tags
-              .filter((t) => t.item_count > 0)
-              .map((tag) => (
-                <TagChip
-                  key={tag.slug}
-                  label={`${tag.name} (${tag.item_count})`}
-                  active={activeTag === tag.slug}
-                  onClick={() => setActiveTag(activeTag === tag.slug ? null : tag.slug)}
+            {domainsWithItems.map((domain) => {
+              const totalCount = domain.categories?.reduce((sum, c) => sum + c.item_count, 0) || 0;
+              return (
+                <FilterChip
+                  key={domain.slug}
+                  label={`${domain.name} (${totalCount})`}
+                  active={activeDomain === domain.slug}
+                  onClick={() => {
+                    if (activeDomain === domain.slug) {
+                      setActiveDomain(null);
+                      setActiveCategory(null);
+                    } else {
+                      setActiveDomain(domain.slug);
+                      setActiveCategory(null);
+                    }
+                  }}
                 />
-              ))}
+              );
+            })}
           </div>
+
+          {/* Sub-category chips (shown when a domain is selected) */}
+          {activeDomain && (() => {
+            const domain = domains.find(d => d.slug === activeDomain);
+            const catsWithItems = domain?.categories?.filter(c => c.item_count > 0) || [];
+            if (catsWithItems.length === 0) return null;
+            return (
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none pl-2">
+                <FilterChip
+                  label="All in domain"
+                  active={!activeCategory}
+                  onClick={() => setActiveCategory(null)}
+                  small
+                />
+                {catsWithItems.map((cat) => (
+                  <FilterChip
+                    key={cat.slug}
+                    label={`${cat.name} (${cat.item_count})`}
+                    active={activeCategory === cat.slug}
+                    onClick={() => setActiveCategory(activeCategory === cat.slug ? null : cat.slug)}
+                    small
+                  />
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Type filter */}
           <div className="flex gap-2">
@@ -360,11 +397,13 @@ function StepIcon({ status }) {
   return <span className="w-4 h-4 rounded-full border border-text-dim inline-block" />;
 }
 
-function TagChip({ label, active, onClick }) {
+function FilterChip({ label, active, onClick, small }) {
   return (
     <button
       onClick={onClick}
-      className={`whitespace-nowrap text-xs px-3 py-1.5 rounded-full transition-colors ${
+      className={`whitespace-nowrap rounded-full transition-colors ${
+        small ? "text-[11px] px-2.5 py-1" : "text-xs px-3 py-1.5"
+      } ${
         active
           ? "bg-accent text-bg"
           : "bg-bg-card border border-border text-text-muted hover:border-border-focus"
@@ -392,6 +431,7 @@ function TypeChip({ label, active, onClick }) {
 
 function ItemCard({ item, onClick }) {
   const isYoutube = item.type === "youtube";
+  const categories = item.categories || [];
 
   return (
     <button
@@ -399,7 +439,6 @@ function ItemCard({ item, onClick }) {
       className="w-full text-left bg-bg-card hover:bg-bg-card-hover border border-border rounded-xl p-4 transition-colors"
     >
       <div className="flex gap-3">
-        {/* Thumbnail */}
         {isYoutube && item.thumbnail && (
           <div className="flex-shrink-0 w-24 h-16 rounded-lg overflow-hidden bg-bg">
             <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
@@ -407,7 +446,6 @@ function ItemCard({ item, onClick }) {
         )}
 
         <div className="flex-1 min-w-0">
-          {/* Title + type badge */}
           <div className="flex items-start gap-2">
             <h3 className="text-sm font-medium text-text truncate flex-1">
               {item.title || "Untitled"}
@@ -419,30 +457,27 @@ function ItemCard({ item, onClick }) {
             </span>
           </div>
 
-          {/* Author + date */}
           <div className="text-xs text-text-muted mt-0.5">
             {item.author && <span>{item.author}</span>}
             {item.author && item.created_at && <span> · </span>}
             {item.created_at && <span>{new Date(item.created_at).toLocaleDateString()}</span>}
           </div>
 
-          {/* Summary preview */}
           {item.summary_preview && (
             <p className="text-xs text-text-dim mt-1 line-clamp-2">{item.summary_preview}</p>
           )}
 
-          {/* Tags */}
-          {item.tags?.length > 0 && (
+          {/* Categories */}
+          {categories.length > 0 && (
             <div className="flex gap-1 mt-2 flex-wrap">
-              {item.tags.map((tag) => (
-                <span key={tag.slug || tag} className="text-[10px] bg-bg px-2 py-0.5 rounded-full text-text-dim">
-                  {tag.name || tag}
+              {categories.map((cat, i) => (
+                <span key={i} className="text-[10px] bg-bg px-2 py-0.5 rounded-full text-text-dim">
+                  {cat.name || cat.category}
                 </span>
               ))}
             </div>
           )}
 
-          {/* Status indicator */}
           {item.status === "partial" && (
             <span className="text-[10px] text-warning mt-1 inline-block">⚠ Partial save</span>
           )}
@@ -454,10 +489,18 @@ function ItemCard({ item, onClick }) {
 
 function DetailView({ item, detail, notes, onNotesChange, onBack }) {
   const markdown = detail?.markdownContent;
+  const categories = detail?.categories || item.categories || [];
+
+  // Group categories by domain
+  const grouped = {};
+  for (const cat of categories) {
+    const domain = cat.domain_name || cat.domain || "Other";
+    if (!grouped[domain]) grouped[domain] = [];
+    grouped[domain].push(cat);
+  }
 
   return (
     <>
-      {/* Header */}
       <header className="sticky top-0 z-10 bg-bg/95 backdrop-blur-sm border-b border-border px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
           <button onClick={onBack} className="text-text-muted hover:text-text transition-colors text-sm">
@@ -476,7 +519,6 @@ function DetailView({ item, detail, notes, onNotesChange, onBack }) {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-6">
-        {/* Meta */}
         <div className="mb-4">
           <h2 className="text-xl font-semibold font-display">{item.title}</h2>
           <div className="flex items-center gap-2 mt-2 text-sm text-text-muted">
@@ -489,19 +531,23 @@ function DetailView({ item, detail, notes, onNotesChange, onBack }) {
             {item.created_at && <span>· Saved {new Date(item.created_at).toLocaleDateString()}</span>}
           </div>
 
-          {/* Tags */}
-          {(item.tags?.length > 0 || detail?.tags?.length > 0) && (
-            <div className="flex gap-1.5 mt-3 flex-wrap">
-              {(detail?.tags || item.tags || []).map((tag) => (
-                <span key={tag.slug || tag.name || tag} className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full">
-                  {tag.name || tag}
-                </span>
+          {/* Categories grouped by domain */}
+          {Object.keys(grouped).length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              {Object.entries(grouped).map(([domain, cats]) => (
+                <div key={domain} className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] text-text-dim uppercase tracking-wide">{domain}:</span>
+                  {cats.map((cat, i) => (
+                    <span key={i} className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full">
+                      {cat.name || cat.category}
+                    </span>
+                  ))}
+                </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* YouTube thumbnail */}
         {item.type === "youtube" && (item.thumbnail || detail?.thumbnail) && (
           <div className="mb-6 rounded-xl overflow-hidden">
             <img
@@ -512,7 +558,6 @@ function DetailView({ item, detail, notes, onNotesChange, onBack }) {
           </div>
         )}
 
-        {/* Markdown content */}
         {!detail && (
           <div className="flex items-center justify-center py-12">
             <span className="inline-block w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
@@ -526,7 +571,6 @@ function DetailView({ item, detail, notes, onNotesChange, onBack }) {
           </div>
         )}
 
-        {/* Personal Notes */}
         <div className="mt-8 pt-6 border-t border-border">
           <h3 className="text-sm font-medium text-text-muted mb-2">Personal Notes</h3>
           <textarea
@@ -538,7 +582,6 @@ function DetailView({ item, detail, notes, onNotesChange, onBack }) {
           <p className="text-[10px] text-text-dim mt-1">Auto-saves as you type</p>
         </div>
 
-        {/* File paths */}
         {(item.file_path || detail?.file_path) && (
           <div className="mt-6 pt-4 border-t border-border">
             <h3 className="text-sm font-medium text-text-muted mb-2">Local Files</h3>
@@ -553,10 +596,7 @@ function DetailView({ item, detail, notes, onNotesChange, onBack }) {
 }
 
 function MarkdownRenderer({ content }) {
-  // Strip YAML frontmatter
   const stripped = content.replace(/^---[\s\S]*?---\n*/, "");
-
-  // Simple markdown to HTML conversion
   const lines = stripped.split("\n");
   const elements = [];
   let i = 0;
@@ -564,43 +604,19 @@ function MarkdownRenderer({ content }) {
   while (i < lines.length) {
     const line = lines[i];
 
-    // Headers
-    if (line.startsWith("# ")) {
-      // Skip the main title (we show it above)
-      i++;
-      continue;
-    }
+    if (line.startsWith("# ")) { i++; continue; }
     if (line.startsWith("## ")) {
-      elements.push(
-        <h2 key={i} className="text-base font-semibold text-text mt-6 mb-2">
-          {line.slice(3)}
-        </h2>
-      );
-      i++;
-      continue;
+      elements.push(<h2 key={i} className="text-base font-semibold text-text mt-6 mb-2">{line.slice(3)}</h2>);
+      i++; continue;
     }
     if (line.startsWith("### ")) {
-      elements.push(
-        <h3 key={i} className="text-sm font-semibold text-text mt-4 mb-1">
-          {line.slice(4)}
-        </h3>
-      );
-      i++;
-      continue;
+      elements.push(<h3 key={i} className="text-sm font-semibold text-text mt-4 mb-1">{line.slice(4)}</h3>);
+      i++; continue;
     }
-
-    // Blockquote
     if (line.startsWith("> ")) {
-      elements.push(
-        <blockquote key={i} className="border-l-2 border-accent/40 pl-3 my-2 text-sm text-text-muted italic">
-          {line.slice(2)}
-        </blockquote>
-      );
-      i++;
-      continue;
+      elements.push(<blockquote key={i} className="border-l-2 border-accent/40 pl-3 my-2 text-sm text-text-muted italic">{line.slice(2)}</blockquote>);
+      i++; continue;
     }
-
-    // List item
     if (line.startsWith("- ")) {
       elements.push(
         <div key={i} className="flex gap-2 text-sm text-text/90 my-1">
@@ -608,29 +624,12 @@ function MarkdownRenderer({ content }) {
           <span>{formatInlineMarkdown(line.slice(2))}</span>
         </div>
       );
-      i++;
-      continue;
+      i++; continue;
     }
+    if (line.trim() === "---") { elements.push(<hr key={i} className="border-border my-4" />); i++; continue; }
+    if (line.trim() === "") { i++; continue; }
 
-    // Horizontal rule
-    if (line.trim() === "---") {
-      elements.push(<hr key={i} className="border-border my-4" />);
-      i++;
-      continue;
-    }
-
-    // Empty line
-    if (line.trim() === "") {
-      i++;
-      continue;
-    }
-
-    // Regular paragraph
-    elements.push(
-      <p key={i} className="text-sm text-text/80 my-2 leading-relaxed">
-        {formatInlineMarkdown(line)}
-      </p>
-    );
+    elements.push(<p key={i} className="text-sm text-text/80 my-2 leading-relaxed">{formatInlineMarkdown(line)}</p>);
     i++;
   }
 
@@ -638,15 +637,8 @@ function MarkdownRenderer({ content }) {
 }
 
 function formatInlineMarkdown(text) {
-  // Bold
   const parts = text.split(/\*\*(.*?)\*\*/g);
   return parts.map((part, i) =>
-    i % 2 === 1 ? (
-      <strong key={i} className="font-semibold text-text">
-        {part}
-      </strong>
-    ) : (
-      part
-    )
+    i % 2 === 1 ? <strong key={i} className="font-semibold text-text">{part}</strong> : part
   );
 }

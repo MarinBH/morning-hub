@@ -6,11 +6,12 @@
 }
 
 body {
-  background: #121110;
+  background: #0c0b0a;
   color: #F0EDE6;
-  font-family: 'DM Sans', -apple-system, sans-serif;
+  font-family: 'DM Sans', 'Inter', -apple-system, sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 @keyframes pulse {
@@ -28,18 +29,44 @@ body {
   to { transform: translateY(0); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 textarea:focus,
 input:focus {
-  border-color: rgba(108, 155, 255, 0.3) !important;
+  border-color: rgba(108, 155, 255, 0.35) !important;
   outline: none;
+  box-shadow: 0 0 0 3px rgba(108, 155, 255, 0.08);
 }
 
 button {
   font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
 }
 
 ::-webkit-scrollbar {
-  width: 0;
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 /* PWA safe areas */

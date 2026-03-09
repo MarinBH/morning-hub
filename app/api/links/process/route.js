@@ -117,6 +117,7 @@ export async function POST(request) {
         });
 
         // Insert into database
+        const previewText = summary.tldr || (summary.summary || "").substring(0, 200);
         const result = insertItem({
           url,
           type,
@@ -126,7 +127,7 @@ export async function POST(request) {
           duration: metadata.duration || null,
           publish_date: metadata.publishedTime || null,
           reading_time: metadata.readingTime || null,
-          summary_preview: (summary.summary || "").substring(0, 200),
+          summary_preview: previewText,
           file_path: fileResult.relativePath,
           status: itemStatus,
           error_message: itemStatus === "partial" ? "AI summarization failed" : null,

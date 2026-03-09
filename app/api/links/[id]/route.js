@@ -14,14 +14,22 @@ export async function GET(request, { params }) {
 
     // Read markdown summary from disk
     let markdownContent = null;
+    let jsonArtifact = null;
     if (item.file_path) {
-      const mdPath = path.join(process.cwd(), "storage", "saved", item.file_path, "summary.md");
+      const basePath = path.join(process.cwd(), "storage", "saved", item.file_path);
+      const mdPath = path.join(basePath, "summary.md");
+      const jsonPath = path.join(basePath, "summary.json");
       if (fs.existsSync(mdPath)) {
         markdownContent = fs.readFileSync(mdPath, "utf-8");
       }
+      if (fs.existsSync(jsonPath)) {
+        try {
+          jsonArtifact = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+        } catch { /* ignore parse errors */ }
+      }
     }
 
-    return Response.json({ ...item, markdownContent });
+    return Response.json({ ...item, markdownContent, jsonArtifact });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }

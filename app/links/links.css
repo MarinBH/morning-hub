@@ -1,22 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #121110;
+  --color-bg: #0c0b0a;
+  --color-bg-elevated: #141312;
   --color-bg-card: #1a1918;
-  --color-bg-card-hover: #222120;
-  --color-bg-input: #1a1918;
-  --color-border: #2a2928;
-  --color-border-focus: rgba(108, 155, 255, 0.3);
+  --color-bg-card-hover: #201f1e;
+  --color-bg-input: #161514;
+  --color-bg-glass: rgba(26, 25, 24, 0.7);
+  --color-border: #252423;
+  --color-border-subtle: #1e1d1c;
+  --color-border-focus: rgba(108, 155, 255, 0.35);
   --color-text: #F0EDE6;
+  --color-text-secondary: #b5b0a9;
   --color-text-muted: #8a8785;
   --color-text-dim: #5a5856;
   --color-accent: #6C9BFF;
   --color-accent-hover: #5a8aee;
+  --color-accent-glow: rgba(108, 155, 255, 0.12);
   --color-success: #6CFFB8;
+  --color-success-glow: rgba(108, 255, 184, 0.1);
   --color-warning: #FFD666;
   --color-error: #FF6B6B;
-  --color-youtube: #FF0000;
+  --color-youtube: #FF4444;
   --color-article: #6C9BFF;
-  --font-sans: 'DM Sans', -apple-system, sans-serif;
-  --font-display: 'Playfair Display', serif;
+  --font-sans: 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 }

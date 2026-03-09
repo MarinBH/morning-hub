@@ -2,13 +2,13 @@
 import { useState } from 'react';
 import { colors, radius, spacing, typography, fonts } from '../../lib/theme';
 import { WHEEL_OF_LIFE_AREAS } from '../../lib/constants';
-import { useWheelOfLife } from '../../hooks/useWheelOfLife';
+import { useWheelOfLifeContext } from '../../contexts/WheelOfLifeContext';
 import Card from '../common/Card';
 import ProgressBar from '../common/ProgressBar';
 import WheelOfLife from '../common/WheelOfLife';
 
 export default function GoalsPanel() {
-  const { scores, goals, avgScore, setScore, addGoal, toggleGoal } = useWheelOfLife();
+  const { scores, goals, avgScore, setScore, addGoal, toggleGoal } = useWheelOfLifeContext();
   const [expandedArea, setExpandedArea] = useState(null);
   const [newGoalText, setNewGoalText] = useState('');
 

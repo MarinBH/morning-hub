@@ -8,7 +8,7 @@ export default function FloatingCapture({ onClick }) {
       style={{
         position: 'fixed',
         bottom: 80,
-        right: 20,
+        right: 'max(20px, calc(50% - 240px + 20px))',
         width: 56,
         height: 56,
         borderRadius: radius.circle,

@@ -8,8 +8,10 @@ export default function BottomNav({ activeTab, onTabChange }) {
       style={{
         position: 'fixed',
         bottom: 0,
-        left: 0,
-        right: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 480,
         display: 'flex',
         justifyContent: 'center',
         background: 'rgba(18,17,16,0.95)',

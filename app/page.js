@@ -6,6 +6,7 @@ import { useTodayState } from './hooks/useTodayState';
 import { usePullToRefresh } from './hooks/usePullToRefresh';
 import { TasksProvider, useTasks } from './contexts/TasksContext';
 import { CalendarProvider, useCalendarEvents } from './contexts/CalendarContext';
+import { WheelOfLifeProvider } from './contexts/WheelOfLifeContext';
 
 import Header from './components/layout/Header';
 import BottomNav from './components/layout/BottomNav';
@@ -45,6 +46,7 @@ export default function CommandCenter() {
   return (
     <TasksProvider>
       <CalendarProvider>
+        <WheelOfLifeProvider>
         <AppShell
           tab={tab}
           setTab={setTab}
@@ -63,6 +65,7 @@ export default function CommandCenter() {
           setJournal={setJournal}
           addCapture={addCapture}
         />
+        </WheelOfLifeProvider>
       </CalendarProvider>
     </TasksProvider>
   );

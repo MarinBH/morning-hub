@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { todayKey, loadLocal, saveLocal } from '../lib/utils';
 import { STORAGE_KEYS, HABITS } from '../lib/constants';
 
@@ -41,8 +41,8 @@ export function useTodayState() {
     ((habits.length / HABITS.length) * 100 + (journal ? 100 : 0)) / 2
   );
 
-  // Streak — count consecutive days with at least 1 habit logged
-  const streakDays = (() => {
+  // Streak — count consecutive days with at least 1 habit logged (memoized)
+  const streakDays = useMemo(() => {
     if (!loaded) return 0;
     let count = 0;
     const today = new Date();
@@ -59,7 +59,7 @@ export function useTodayState() {
     }
     if (habits.length > 0) count++;
     return count;
-  })();
+  }, [habits, loaded]);
 
   return {
     habits,

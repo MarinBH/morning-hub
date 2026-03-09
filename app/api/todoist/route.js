@@ -45,9 +45,13 @@ export async function POST(request) {
   }
 
   try {
-    const { taskId, action } = await request.json();
+    const body = await request.json();
+    const { taskId, action, content, projectId } = body;
 
     if (action === "complete") {
+      if (!taskId || !/^\d+$/.test(String(taskId))) {
+        return Response.json({ error: "Invalid task ID" }, { status: 400 });
+      }
       const res = await fetch(`https://api.todoist.com/api/v1/tasks/${taskId}/close`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -59,7 +63,6 @@ export async function POST(request) {
     }
 
     if (action === "add") {
-      const { content, projectId } = await request.json();
       const res = await fetch(`https://api.todoist.com/api/v1/tasks`, {
         method: "POST",
         headers: {

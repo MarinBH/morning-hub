@@ -6,7 +6,7 @@ import { isTaskOverdue } from '../../lib/utils';
 import { HABITS, getPrompt, PRIORITY_COLORS } from '../../lib/constants';
 import { useTasks } from '../../contexts/TasksContext';
 import { useCalendarEvents } from '../../contexts/CalendarContext';
-import { useWheelOfLife } from '../../hooks/useWheelOfLife';
+import { useWheelOfLifeContext } from '../../contexts/WheelOfLifeContext';
 import Card from '../common/Card';
 import ProgressBar from '../common/ProgressBar';
 import Badge from '../common/Badge';
@@ -275,7 +275,7 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
 }
 
 function WheelOfLifeMini({ onNavigate }) {
-  const { scores } = useWheelOfLife();
+  const { scores } = useWheelOfLifeContext();
   const hasScores = Object.values(scores).some((v) => v > 0);
 
   if (!hasScores) {

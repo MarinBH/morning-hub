@@ -62,6 +62,38 @@ export async function POST(request) {
       return Response.json({ success: true });
     }
 
+    if (action === "update") {
+      if (!taskId || !/^\d+$/.test(String(taskId))) {
+        return Response.json({ error: "Invalid task ID" }, { status: 400 });
+      }
+      const { content: updateContent, description, priority, due_string } = body;
+      if (updateContent !== undefined && (typeof updateContent !== 'string' || !updateContent.trim())) {
+        return Response.json({ error: "Content must be a non-empty string" }, { status: 400 });
+      }
+      if (priority !== undefined && (typeof priority !== 'number' || priority < 1 || priority > 4)) {
+        return Response.json({ error: "Priority must be 1-4" }, { status: 400 });
+      }
+      const updateBody = {};
+      if (updateContent !== undefined) updateBody.content = updateContent.trim();
+      if (description !== undefined) updateBody.description = String(description);
+      if (priority !== undefined) updateBody.priority = priority;
+      if (due_string !== undefined) updateBody.due_string = due_string || null;
+
+      const res = await fetch(`https://api.todoist.com/api/v1/tasks/${taskId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateBody),
+      });
+      if (!res.ok) {
+        return Response.json({ error: `Failed to update task: ${res.status}` }, { status: res.status });
+      }
+      const data = await res.json();
+      return Response.json(data);
+    }
+
     if (action === "add") {
       const res = await fetch(`https://api.todoist.com/api/v1/tasks`, {
         method: "POST",

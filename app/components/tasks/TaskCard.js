@@ -5,10 +5,11 @@ import { isTaskOverdue } from '../../lib/utils';
 import { PRIORITY_COLORS } from '../../lib/constants';
 import Badge from '../common/Badge';
 
-export default function TaskCard({ task, projects, completing, onComplete, onExpand }) {
+export default function TaskCard({ task, projects, completing, onComplete, onExpand, impactScore }) {
   const done = completing;
   const overdue = isTaskOverdue(task);
   const projectName = projects[task.project_id] || 'Inbox';
+  const isHighImpact = impactScore >= 4;
 
   return (
     <div
@@ -21,6 +22,7 @@ export default function TaskCard({ task, projects, completing, onComplete, onExp
         opacity: done ? 0.3 : 1,
         transform: done ? 'translateX(20px)' : 'none',
         minHeight: 44,
+        borderLeft: isHighImpact ? `3px solid ${colors.primary}` : 'none',
       }}
     >
       {/* Checkbox */}
@@ -63,6 +65,11 @@ export default function TaskCard({ task, projects, completing, onComplete, onExp
             </span>
           )}
           {overdue && <Badge color={colors.danger} bg={colors.dangerBg}>overdue</Badge>}
+          {impactScore > 0 && (
+            <span style={{ fontSize: 11, color: colors.warning, letterSpacing: -1 }}>
+              {'\u2605'.repeat(impactScore)}{'\u2606'.repeat(5 - impactScore)}
+            </span>
+          )}
         </div>
       </div>
     </div>

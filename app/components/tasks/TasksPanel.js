@@ -5,6 +5,7 @@ import { API } from '../../lib/constants';
 import { useTasks } from '../../contexts/TasksContext';
 import KanbanView from './KanbanView';
 import QuickAdd from './QuickAdd';
+import TaskEditor from './TaskEditor';
 
 export default function TasksPanel() {
   const { allTasks, projects, loading, error, removeTask, addTask } = useTasks();
@@ -97,62 +98,13 @@ export default function TasksPanel() {
         />
       )}
 
-      {/* Expanded task detail */}
+      {/* Task editor bottom sheet */}
       {expanded && (
-        <div
-          onClick={() => setExpanded(null)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 200,
-            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
-            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%', maxWidth: 480,
-              background: colors.bgElevated,
-              borderRadius: `${radius.lg}px ${radius.lg}px 0 0`,
-              padding: `${spacing.xxl}px ${spacing.xl}px ${spacing.xxxl}px`,
-            }}
-          >
-            <div style={{ width: 40, height: 4, borderRadius: 2, background: colors.textGhost, margin: '0 auto 20px' }} />
-            <div style={{ fontSize: 18, fontWeight: 600, color: colors.text, marginBottom: spacing.md }}>
-              {expanded.content}
-            </div>
-            {expanded.description && (
-              <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.lg, lineHeight: 1.5 }}>
-                {expanded.description}
-              </div>
-            )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.sm, fontSize: 13 }}>
-              {expanded.due?.date && (
-                <span style={{ padding: '6px 12px', borderRadius: radius.full, background: colors.bgCard, color: colors.textMuted }}>
-                  {'\u{1F4C5}'} {expanded.due.date}
-                </span>
-              )}
-              <span style={{ padding: '6px 12px', borderRadius: radius.full, background: colors.bgCard, color: colors.textMuted }}>
-                {'\u{1F4C1}'} {projects[expanded.project_id] || 'Inbox'}
-              </span>
-              {expanded.priority > 1 && (
-                <span style={{ padding: '6px 12px', borderRadius: radius.full, background: colors.bgCard, color: colors.textMuted }}>
-                  P{5 - expanded.priority}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={() => setExpanded(null)}
-              style={{
-                width: '100%', marginTop: spacing.xl, padding: `${spacing.md}px`,
-                borderRadius: radius.sm, border: `1px solid ${colors.borderActive}`,
-                background: 'transparent', color: colors.textDim,
-                fontSize: 14, cursor: 'pointer', minHeight: 44,
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <TaskEditor
+          task={expanded}
+          projects={projects}
+          onClose={() => setExpanded(null)}
+        />
       )}
 
       {/* Undo toast */}

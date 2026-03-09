@@ -18,12 +18,13 @@ Mobile-first PWA ("Morning Hub") built with Next.js 16 + React 18. Single-user p
 
 ### Entry Point & Tabs
 
-`app/page.js` — Root client component. Renders 4 tabs: **dashboard**, **tasks**, **practice**, **goals**. All tabs mount simultaneously (`display: none` for inactive) to preserve state. Wraps content in three context providers: `TasksProvider` > `CalendarProvider` > `WheelOfLifeProvider` > `ErrorBoundary`.
+`app/page.js` — Root client component. Renders 4 tabs: **dashboard**, **tasks**, **practice**, **goals**. All tabs mount simultaneously (`display: none` for inactive) to preserve state. Wraps content in context providers: `TasksProvider` > `TaskGoalsProvider` > `CalendarProvider` > `WheelOfLifeProvider` > `ErrorBoundary`.
 
 ### State Management
 
 **Contexts** (`app/contexts/`):
-- `TasksContext` — Todoist tasks + projects, fetched from `/api/todoist`. Exposes `allTasks`, `addTask`, `removeTask`, `refetch`.
+- `TasksContext` — Todoist tasks + projects, fetched from `/api/todoist`. Exposes `allTasks`, `addTask`, `removeTask`, `updateTask`, `refetch`.
+- `TaskGoalsContext` — Task-goal linking + impact scores in localStorage (`hub-task-goals`). Exposes `linkTask`, `unlinkTask`, `getTaskGoal`, `getTasksByDomain`. Auto-prunes orphaned mappings on task refetch.
 - `CalendarContext` — Google Calendar events from `/api/calendar`. Returns mock data when unconfigured.
 - `WheelOfLifeContext` — Wheel of Life scores/goals. Shared across Dashboard and Goals tab.
 
@@ -67,6 +68,7 @@ All client state uses localStorage via `loadLocal`/`saveLocal` from `app/lib/uti
 - `hub-habit-config` — Habit pack selection + custom habits
 - `hub-knowledge` — Knowledge items (persists across days)
 - `hub-wheel-of-life` — Life area scores and goals
+- `hub-task-goals` — Task-goal mappings with impact scores `{ [taskId]: { domainId, milestoneId?, impactScore?, linkedKnowledge?, updatedAt } }`
 
 ### Habit Packs (`app/lib/habitPacks.js`)
 
@@ -85,6 +87,7 @@ All client state uses localStorage via `loadLocal`/`saveLocal` from `app/lib/uti
 - **Review #2**: Shared contexts (Tasks, Calendar, WheelOfLife), extracted common components
 - **Sprints D-I**: Habit packs, morning flow carousel, kanban task view, knowledge capture + AI, goals domain journeys
 - **Sprint K**: Fixed 18 audit bugs (state integrity, MorningFlow shared state, knowledge system, task polish, custom habit editor UI)
+- **Sprint L**: Task engine enhancements — task editing via Todoist API, task-goal linking with TaskGoalsContext, impact scoring (1-5 stars), orphan cleanup
 
 ### Known Bugs from Triple-Agent Audit
 

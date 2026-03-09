@@ -9,6 +9,7 @@ import { useKnowledge } from './hooks/useKnowledge';
 import { TasksProvider, useTasks } from './contexts/TasksContext';
 import { CalendarProvider, useCalendarEvents } from './contexts/CalendarContext';
 import { WheelOfLifeProvider } from './contexts/WheelOfLifeContext';
+import { TaskGoalsProvider } from './contexts/TaskGoalsContext';
 
 import Header from './components/layout/Header';
 import BottomNav from './components/layout/BottomNav';
@@ -66,6 +67,7 @@ export default function CommandCenter() {
 
   return (
     <TasksProvider>
+      <TaskGoalsProvider>
       <CalendarProvider>
         <WheelOfLifeProvider>
         <ErrorBoundary>
@@ -94,6 +96,7 @@ export default function CommandCenter() {
         </ErrorBoundary>
         </WheelOfLifeProvider>
       </CalendarProvider>
+      </TaskGoalsProvider>
     </TasksProvider>
   );
 }

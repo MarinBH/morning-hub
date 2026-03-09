@@ -60,6 +60,10 @@ export function TasksProvider({ children }) {
     setAllTasks((prev) => [task, ...prev]);
   }, []);
 
+  const updateTask = useCallback((taskId, updates) => {
+    setAllTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, ...updates } : t));
+  }, []);
+
   // Backwards-compatible: "tasks" = today + overdue only
   const today = todayKey();
   const tasks = allTasks.filter((t) => {
@@ -77,6 +81,7 @@ export function TasksProvider({ children }) {
       refetch: loadTasks,
       removeTask,
       addTask,
+      updateTask,
     }}>
       {children}
     </TasksContext.Provider>

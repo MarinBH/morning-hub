@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { colors, radius, spacing, typography } from '../../lib/theme';
 import { WHEEL_OF_LIFE_AREAS } from '../../lib/constants';
 import { useWheelOfLifeContext } from '../../contexts/WheelOfLifeContext';
+import { useTaskGoals } from '../../contexts/TaskGoalsContext';
 import WheelOfLife from '../common/WheelOfLife';
 import DomainJourney from './DomainJourney';
 import MilestoneList from './MilestoneList';
 
 export default function GoalsPanel() {
   const { scores, goals, avgScore, setScore, addGoal, toggleGoal, removeGoal } = useWheelOfLifeContext();
+  const { getTasksByDomain } = useTaskGoals();
   const [expandedArea, setExpandedArea] = useState(null);
 
   return (
@@ -40,6 +42,7 @@ export default function GoalsPanel() {
         {WHEEL_OF_LIFE_AREAS.map((area) => {
           const score = scores[area.id] ?? 0;
           const areaGoals = goals[area.id] || [];
+          const linkedTaskIds = getTasksByDomain(area.id);
           const isExpanded = expandedArea === area.id;
 
           return (
@@ -52,6 +55,17 @@ export default function GoalsPanel() {
                   milestones={areaGoals}
                   compact
                 />
+                {linkedTaskIds.length > 0 && (
+                  <div style={{
+                    padding: `${spacing.xs}px ${spacing.lg}px ${spacing.sm}px`,
+                    fontSize: 11, color: area.color,
+                    background: colors.bgCard,
+                    borderRadius: `0 0 ${radius.sm}px ${radius.sm}px`,
+                    marginTop: -2,
+                  }}>
+                    {linkedTaskIds.length} task{linkedTaskIds.length !== 1 ? 's' : ''} linked
+                  </div>
+                )}
               </div>
 
               {/* Expanded view */}

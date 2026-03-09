@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react';
 import { colors, radius, spacing } from '../../lib/theme';
 import { todayKey } from '../../lib/utils';
+import { useTaskGoals } from '../../contexts/TaskGoalsContext';
 import TaskCard from './TaskCard';
 
 const COLUMNS = [
@@ -41,6 +42,7 @@ function categorizeTasks(allTasks) {
 }
 
 export default function KanbanView({ allTasks, projects, completing, onComplete, onExpand, onColumnChange }) {
+  const { getTaskGoal } = useTaskGoals();
   const [activeCol, setActiveCol] = useState('today');
   const touchStartRef = useRef(null);
 
@@ -138,6 +140,7 @@ export default function KanbanView({ allTasks, projects, completing, onComplete,
                 completing={completing.has(task.id)}
                 onComplete={onComplete}
                 onExpand={onExpand}
+                impactScore={getTaskGoal(task.id)?.impactScore || 0}
               />
             ))}
           </div>

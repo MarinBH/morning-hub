@@ -7,6 +7,7 @@ import { HABITS, PRIORITY_COLORS } from '../../lib/constants';
 import { useTasks } from '../../contexts/TasksContext';
 import { useCalendarEvents } from '../../contexts/CalendarContext';
 import { useWheelOfLifeContext } from '../../contexts/WheelOfLifeContext';
+import { useTaskGoals } from '../../contexts/TaskGoalsContext';
 import Card from '../common/Card';
 import Badge from '../common/Badge';
 import WheelOfLife from '../common/WheelOfLife';
@@ -18,12 +19,23 @@ import KnowledgeFeed from '../knowledge/KnowledgeFeed';
 export default function Dashboard({ habits, journalEntry, onHabitToggle, onJournalChange, onNavigate, committed, onCommit, habitConfig, onBreathworkDone, onBreathworkSkip, streakDays, knowledge, flowStep, setFlowStep, flowCelebrating, setFlowCelebrating, flowCollapsed, setFlowCollapsed }) {
   const [showAllKnowledge, setShowAllKnowledge] = useState(false);
   const { tasks, loading: loadingTasks, error: errorTasks } = useTasks();
+  const { getTaskGoal } = useTaskGoals();
   const { events, loading: loadingEvents, error: errorEvents } = useCalendarEvents();
 
   const habitDefs = habitConfig?.habits?.length > 0 ? habitConfig.habits : HABITS;
 
   const nextEvent = events[0];
-  const highPriorityTasks = tasks.filter((t) => t.priority >= 3);
+  // Sort focus tasks by: impact score desc, then priority desc, then due date asc
+  const focusTasks = [...tasks].sort((a, b) => {
+    const aImpact = getTaskGoal(a.id)?.impactScore || 0;
+    const bImpact = getTaskGoal(b.id)?.impactScore || 0;
+    if (bImpact !== aImpact) return bImpact - aImpact;
+    if (b.priority !== a.priority) return b.priority - a.priority;
+    const aDate = a.due?.date || '9999';
+    const bDate = b.due?.date || '9999';
+    return aDate.localeCompare(bDate);
+  });
+  const topFocusTasks = focusTasks.slice(0, 3).filter((t) => (getTaskGoal(t.id)?.impactScore || 0) >= 1 || t.priority >= 3);
   const previewTasks = tasks.slice(0, 5);
 
   return (
@@ -54,27 +66,35 @@ export default function Dashboard({ habits, journalEntry, onHabitToggle, onJourn
           <div style={{ fontSize: 14, color: colors.textDim }}>Loading priorities...</div>
         ) : errorTasks ? (
           <div style={{ fontSize: 14, color: colors.danger }}>Failed to load tasks</div>
-        ) : highPriorityTasks.length > 0 ? (
+        ) : topFocusTasks.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.sm }}>
-            {highPriorityTasks.slice(0, 3).map((task, i) => (
-              <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: 6,
-                  background: i === 0 ? 'rgba(108,155,255,0.15)' : 'rgba(255,255,255,0.04)',
-                  border: `1.5px solid ${i === 0 ? colors.primary : colors.textGhost}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700, color: i === 0 ? colors.primary : colors.textFaint,
-                }}>
-                  {i + 1}
+            {topFocusTasks.map((task, i) => {
+              const impact = getTaskGoal(task.id)?.impactScore || 0;
+              return (
+                <div key={task.id} style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+                  <div style={{
+                    width: 20, height: 20, borderRadius: 6,
+                    background: i === 0 ? 'rgba(108,155,255,0.15)' : 'rgba(255,255,255,0.04)',
+                    border: `1.5px solid ${i === 0 ? colors.primary : colors.textGhost}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 10, fontWeight: 700, color: i === 0 ? colors.primary : colors.textFaint,
+                  }}>
+                    {i + 1}
+                  </div>
+                  <span style={{
+                    fontSize: 14, color: i === 0 ? colors.text : 'rgba(240,237,230,0.7)',
+                    fontWeight: i === 0 ? 600 : 400, flex: 1,
+                  }}>
+                    {task.content}
+                  </span>
+                  {impact > 0 && (
+                    <span style={{ fontSize: 10, color: colors.warning, letterSpacing: -1 }}>
+                      {'\u2605'.repeat(impact)}
+                    </span>
+                  )}
                 </div>
-                <span style={{
-                  fontSize: 14, color: i === 0 ? colors.text : 'rgba(240,237,230,0.7)',
-                  fontWeight: i === 0 ? 600 : 400,
-                }}>
-                  {task.content}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : previewTasks.length > 0 ? (
           <div style={{ fontSize: 14, color: colors.textMuted }}>

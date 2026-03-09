@@ -12,6 +12,10 @@ export default class ErrorBoundary extends Component {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error, info) {
+    console.error('[ErrorBoundary]', error?.message, info?.componentStack);
+  }
+
   render() {
     if (this.state.hasError) {
       return (
@@ -27,6 +31,9 @@ export default class ErrorBoundary extends Component {
           <div style={{ textAlign: 'center', maxWidth: 320 }}>
             <div style={{ fontSize: 40, marginBottom: spacing.md }}>{'⚠️'}</div>
             <div style={{ fontSize: 18, fontWeight: 600, marginBottom: spacing.sm }}>Something went wrong</div>
+            <div style={{ fontSize: 13, color: colors.danger, marginBottom: spacing.md, textAlign: 'left', background: 'rgba(255,107,107,0.08)', padding: '10px 12px', borderRadius: radius.sm, wordBreak: 'break-word' }}>
+              {this.state.error?.message || 'Unknown error'}
+            </div>
             <div style={{ fontSize: 14, color: colors.textDim, marginBottom: spacing.xl }}>
               The app encountered an error. Try refreshing the page.
             </div>

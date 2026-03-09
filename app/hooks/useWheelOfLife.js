@@ -48,6 +48,13 @@ export function useWheelOfLife() {
     }));
   };
 
+  const removeGoal = (areaId, goalId) => {
+    setGoals((prev) => ({
+      ...prev,
+      [areaId]: (prev[areaId] || []).filter((g) => g.id !== goalId),
+    }));
+  };
+
   const avgScore =
     Object.values(scores).length > 0
       ? (Object.values(scores).reduce((a, b) => a + b, 0) / WHEEL_OF_LIFE_AREAS.length).toFixed(1)
@@ -61,5 +68,6 @@ export function useWheelOfLife() {
     setScore,
     addGoal,
     toggleGoal,
+    removeGoal,
   };
 }

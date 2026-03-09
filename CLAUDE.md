@@ -62,8 +62,8 @@ Dark theme: `#121110` background, `#F0EDE6` text. Brand colors: primary `#6C9BFF
 ### Data Persistence
 
 All client state uses localStorage via `loadLocal`/`saveLocal` from `app/lib/utils.js`. Keys:
-- `hub-${YYYY-MM-DD}` — Daily state (habits, journal, captures, breathworkDone)
-- `hub-committed-${YYYY-MM-DD}` — Daily commitment flag
+- `hub-${YYYY-MM-DD}` — Daily state (habits, journal, captures, breathworkDone, breathworkSkipped)
+- `hub-committed-${YYYY-MM-DD}` — Daily commitment data `{ committed: true, intention: string }`
 - `hub-habit-config` — Habit pack selection + custom habits
 - `hub-knowledge` — Knowledge items (persists across days)
 - `hub-wheel-of-life` — Life area scores and goals
@@ -84,40 +84,15 @@ All client state uses localStorage via `loadLocal`/`saveLocal` from `app/lib/uti
 - **Phase 1**: Dashboard shell, command palette, pull-to-refresh, streak counter, skeleton loaders, PWA install prompt
 - **Review #2**: Shared contexts (Tasks, Calendar, WheelOfLife), extracted common components
 - **Sprints D-I**: Habit packs, morning flow carousel, kanban task view, knowledge capture + AI, goals domain journeys
+- **Sprint K**: Fixed 18 audit bugs (state integrity, MorningFlow shared state, knowledge system, task polish, custom habit editor UI)
 
 ### Known Bugs from Triple-Agent Audit
 
-Three parallel audit agents (morning ritual, task management, knowledge capture) identified 66 findings. Key unresolved issues:
+Three parallel audit agents identified 66 findings. Sprint K fixed 18 of 21 tracked bugs. Remaining unresolved:
 
-**Critical:**
-- Voice input duplicates transcript text on every speech event (`CaptureModal.js:58-61`) — `onresult` re-appends all accumulated results
-- "Build Your Own" custom pack creates empty config with no UI to add habits — `addHabit`/`removeHabit` exist in hook but no component exposes them
-- Pack switch orphans completed habit IDs in `useTodayState` — old IDs don't match new pack, corrupts momentum score and counts
-- Rapid task completion creates ghost tasks — single `undoTask`/`undoTimerRef` means completing Task B cancels Task A's timer (`TasksPanel.js:17-43`)
-- `KnowledgeFeed` and `KnowledgePanel` are never rendered — no knowledge tab exists, no way to browse full knowledge base
-
-**High:**
-- `CommitStep` intention text is never persisted — `handleCommit` in `page.js` ignores the argument
-- `CelebrationCard` `onCollapse` is inline arrow function causing timer restarts on re-renders
-- Dashboard and Practice tab have independent `MorningFlow` instances with separate step/celebrating/collapsed state
-- Dashboard bypasses `HabitPackPicker` for unconfigured users, falls back to generic `HABITS`
-- `CaptureModal` task creation POSTs to Todoist but never calls `addTask()` to update local state
-- URL-only content sent to Claude API without fetching — summaries for YouTube/articles are unreliable
-- `totalHabitsOverride` falsy `0` falls back to `HABITS.length` (5) due to `||` instead of `??`
-- No confirmation before deleting knowledge items
-- Expanding `CompactSummary` after commitment resets to step 0 instead of step 3
-
-**Medium:**
-- Swipe conflicts with textarea scroll on Journal step — no `e.target.tagName` check
-- Breathwork "skip" counts same as "done" in momentum score
-- `BreathStep` timer resets when navigating away (component unmounts)
-- `KanbanView` swipe threshold too low (50px), no vertical movement check
-- `QuickAdd` always sets `due_string: "today"` regardless of active column
-- `JSON.parse` of AI response has no try/catch
-- `Date.now()` ID generation can produce collisions
 - `submitError` state check is stale due to React batching (`CaptureModal.js:132`)
-- "Other" category missing from `KnowledgeFeed` filter list
 - No rate limiting on AI summary button
+- Voice input may re-append accumulated transcript on some browsers (`CaptureModal.js:58-61`)
 
 ### Planned Phases (Not Yet Built)
 

@@ -34,6 +34,8 @@ export async function POST(request) {
             message: "This URL has already been saved",
             existingItem: { id: existing.id, title: existing.title, created_at: existing.created_at },
           });
+          controller.close();
+          return;
         }
 
         // Step 1: Detect type
@@ -102,7 +104,9 @@ export async function POST(request) {
         send("step", { step: "saving", status: "in_progress" });
 
         // Build category paths for file storage (files duplicated across categories)
-        const categories = summary.categories || [{ domain: "Personal Growth", category: "Learning Techniques" }];
+        const categories = (summary.categories && summary.categories.length > 0)
+          ? summary.categories
+          : [{ domain: "Personal Growth", category: "Learning Techniques" }];
         const categoryPaths = categories.map(c => ({
           domainSlug: slugify(c.domain),
           categorySlug: slugify(c.category),

@@ -4,9 +4,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const domains = getAllDomainsWithCategories();
-    const topics = getAllTopics();
-    const goals = getAllGoals();
+    const domains = await getAllDomainsWithCategories();
+    const topics = await getAllTopics();
+    const goals = await getAllGoals();
     return Response.json({ domains, topics, goals });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
@@ -20,7 +20,7 @@ export async function POST(request) {
     if (!domainSlug || !name) {
       return Response.json({ error: "domainSlug and name are required" }, { status: 400 });
     }
-    const category = addCategory(domainSlug, name);
+    const category = await addCategory(domainSlug, name);
     return Response.json(category);
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
@@ -35,7 +35,7 @@ export async function DELETE(request) {
     if (!categoryId) {
       return Response.json({ error: "Category id is required" }, { status: 400 });
     }
-    removeCategory(Number(categoryId));
+    await removeCategory(Number(categoryId));
     return Response.json({ success: true });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });

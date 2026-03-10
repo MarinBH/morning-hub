@@ -15,7 +15,7 @@ export async function GET(request) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "20", 10);
 
-    const result = listItems({ category, domain, type, search, topic, concept, goal, page, limit });
+    const result = await listItems({ category, domain, type, search, topic, concept, goal, page, limit });
     return Response.json(result);
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });

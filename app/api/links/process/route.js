@@ -24,11 +24,19 @@ export async function POST(request) {
           return;
         }
 
+        // Validate URL scheme
+        const trimmedUrl = body.url.trim();
+        if (!/^https?:\/\//i.test(trimmedUrl)) {
+          send("error", { message: "Only http and https URLs are supported" });
+          controller.close();
+          return;
+        }
+
         // Normalize URL (mobile → desktop, strip tracking params)
-        const url = normalizeUrl(body.url);
+        const url = normalizeUrl(trimmedUrl);
 
         // Check for duplicates
-        const existing = findItemByUrl(url);
+        const existing = await findItemByUrl(url);
         if (existing) {
           send("duplicate", {
             message: "This URL has already been saved",
@@ -96,7 +104,11 @@ export async function POST(request) {
           itemStatus = "partial";
         }
 
+        // Filter <UNKNOWN> values from AI output
         if (summary) {
+          for (const key of Object.keys(summary)) {
+            if (summary[key] === "<UNKNOWN>") summary[key] = null;
+          }
           send("step", { step: "summarizing", status: "complete" });
         }
 
@@ -120,9 +132,9 @@ export async function POST(request) {
           rawContent,
         });
 
-        // Insert into database
+        // Insert into database (now includes content columns for cloud storage)
         const previewText = summary.tldr || (summary.core_thesis || summary.summary || "").substring(0, 200);
-        const result = insertItem({
+        const result = await insertItem({
           url,
           type,
           title: metadata.title || null,
@@ -133,6 +145,9 @@ export async function POST(request) {
           reading_time: metadata.readingTime || null,
           summary_preview: previewText,
           file_path: fileResult.relativePath,
+          markdown_content: fileResult.markdownContent,
+          json_artifact: fileResult.jsonArtifactStr,
+          raw_content: fileResult.rawContent,
           status: itemStatus,
           error_message: itemStatus === "partial" ? "AI summarization failed" : null,
         });
@@ -140,11 +155,11 @@ export async function POST(request) {
         const itemId = Number(result.lastInsertRowid);
 
         // Link categories (with domain context for proper filing)
-        linkItemCategories(itemId, categories);
+        await linkItemCategories(itemId, categories);
 
         // Link topics, concepts, and goals
-        linkItemTopics(itemId, summary.topics, summary.concepts);
-        linkItemGoals(itemId, summary.goals);
+        await linkItemTopics(itemId, summary.topics, summary.concepts);
+        await linkItemGoals(itemId, summary.goals);
 
         send("step", { step: "saving", status: "complete" });
 

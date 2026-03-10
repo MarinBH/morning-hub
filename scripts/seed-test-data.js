@@ -4,11 +4,95 @@ import path from "path";
 
 const DB_PATH = path.join(process.cwd(), "storage", "linksaver.db");
 const STORAGE_ROOT = path.join(process.cwd(), "storage", "saved");
+const dir = path.dirname(DB_PATH);
+if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 const db = new Database(DB_PATH);
+db.pragma("journal_mode = WAL");
 db.pragma("foreign_keys = ON");
 
 function slugify(text) {
   return text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").substring(0, 60).replace(/(^-|-$)/g, "");
+}
+
+// Create schema (matches lib/db.js)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL UNIQUE,
+    type TEXT NOT NULL,
+    title TEXT,
+    author TEXT,
+    thumbnail TEXT,
+    duration TEXT,
+    publish_date TEXT,
+    reading_time INTEGER,
+    summary_preview TEXT,
+    file_path TEXT,
+    markdown_content TEXT,
+    json_artifact TEXT,
+    raw_content TEXT,
+    status TEXT DEFAULT 'complete',
+    error_message TEXT,
+    personal_notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+  CREATE TABLE IF NOT EXISTS domains (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    slug TEXT UNIQUE NOT NULL,
+    sort_order INTEGER DEFAULT 0
+  );
+  CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    domain_id INTEGER REFERENCES domains(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    is_predefined INTEGER DEFAULT 0,
+    UNIQUE(domain_id, slug)
+  );
+  CREATE TABLE IF NOT EXISTS item_categories (
+    item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+    category_id INTEGER REFERENCES categories(id) ON DELETE CASCADE,
+    PRIMARY KEY (item_id, category_id)
+  );
+  CREATE TABLE IF NOT EXISTS item_topics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+    topic TEXT NOT NULL,
+    topic_type TEXT NOT NULL DEFAULT 'topic',
+    UNIQUE(item_id, topic, topic_type)
+  );
+  CREATE TABLE IF NOT EXISTS item_goals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+    goal TEXT NOT NULL,
+    relevance TEXT,
+    UNIQUE(item_id, goal)
+  );
+`);
+
+// Seed domains and categories
+const DOMAINS_AND_CATEGORIES = {
+  "Health & Fitness": ["Strength Workouts", "Strength Information", "Mobility Workouts", "Mobility Information", "Endurance Workouts", "Endurance Information", "Nutrition", "Supplements", "Mental Health", "Meditation & Mindfulness", "Sleep"],
+  "Career & Work": ["Job Search", "Leadership", "Networking", "Skills Development", "Side Projects", "Freelancing"],
+  "Finance & Wealth": ["Investing", "Budgeting", "Real Estate", "Crypto", "Tax & Legal"],
+  "Relationships & Social": ["Dating", "Communication", "Family", "Friendships", "Social Skills"],
+  "Personal Growth": ["Productivity", "Habits & Routines", "Philosophy", "Journaling", "Learning Techniques", "Books & Reading"],
+  "Fun & Recreation": ["Travel", "Cooking & Food", "Music", "Gaming", "Sports", "Hobbies"],
+  "Environment & Home": ["Home Organization", "Interior Design", "Sustainability", "Tech & Gadgets"],
+  "Tech & Knowledge": ["AI & Machine Learning", "Programming", "Science", "Design", "Data & Analytics"],
+};
+
+let order = 0;
+for (const [domainName, categories] of Object.entries(DOMAINS_AND_CATEGORIES)) {
+  const domainSlug = slugify(domainName);
+  db.prepare("INSERT OR IGNORE INTO domains (name, slug, sort_order) VALUES (?, ?, ?)").run(domainName, domainSlug, order++);
+  const domain = db.prepare("SELECT id FROM domains WHERE slug = ?").get(domainSlug);
+  if (domain) {
+    for (const catName of categories) {
+      db.prepare("INSERT OR IGNORE INTO categories (domain_id, name, slug, is_predefined) VALUES (?, ?, ?, 1)").run(domain.id, catName, slugify(catName));
+    }
+  }
 }
 
 // Delete existing test data

@@ -2,7 +2,7 @@ import { detectUrlType, normalizeUrl } from "../../../../lib/extractors/detect.j
 import { extractYouTube, formatTranscriptText } from "../../../../lib/extractors/youtube.js";
 import { extractArticle } from "../../../../lib/extractors/article.js";
 import { summarizeContent } from "../../../../lib/ai/summarize.js";
-import { findItemByUrl, insertItem, linkItemCategories } from "../../../../lib/db.js";
+import { findItemByUrl, insertItem, linkItemCategories, linkItemTopics, linkItemGoals } from "../../../../lib/db.js";
 import { saveFiles, slugify } from "../../../../lib/storage/files.js";
 
 export const dynamic = "force-dynamic";
@@ -117,7 +117,7 @@ export async function POST(request) {
         });
 
         // Insert into database
-        const previewText = summary.tldr || (summary.summary || "").substring(0, 200);
+        const previewText = summary.tldr || (summary.core_thesis || summary.summary || "").substring(0, 200);
         const result = insertItem({
           url,
           type,
@@ -138,6 +138,10 @@ export async function POST(request) {
         // Link categories (with domain context for proper filing)
         linkItemCategories(itemId, categories);
 
+        // Link topics, concepts, and goals
+        linkItemTopics(itemId, summary.topics, summary.concepts);
+        linkItemGoals(itemId, summary.goals);
+
         send("step", { step: "saving", status: "complete" });
 
         // Done
@@ -149,8 +153,10 @@ export async function POST(request) {
             title: metadata.title,
             author: metadata.author || metadata.channel,
             thumbnail: metadata.thumbnail,
-            summary_preview: (summary.summary || "").substring(0, 200),
+            summary_preview: previewText,
             categories,
+            topics: summary.topics || [],
+            goals: summary.goals || [],
             status: itemStatus,
             file_path: fileResult.relativePath,
           },

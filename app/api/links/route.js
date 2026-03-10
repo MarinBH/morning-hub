@@ -9,10 +9,13 @@ export async function GET(request) {
     const domain = searchParams.get("domain") || undefined;
     const type = searchParams.get("type") || undefined;
     const search = searchParams.get("search") || undefined;
+    const topic = searchParams.get("topic") || undefined;
+    const concept = searchParams.get("concept") || undefined;
+    const goal = searchParams.get("goal") || undefined;
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "20", 10);
 
-    const result = listItems({ category, domain, type, search, page, limit });
+    const result = listItems({ category, domain, type, search, topic, concept, goal, page, limit });
     return Response.json(result);
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });

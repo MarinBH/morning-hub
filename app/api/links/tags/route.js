@@ -1,11 +1,13 @@
-import { getAllDomainsWithCategories, addCategory, removeCategory } from "../../../../lib/db.js";
+import { getAllDomainsWithCategories, addCategory, removeCategory, getAllTopics, getAllGoals } from "../../../../lib/db.js";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
     const domains = getAllDomainsWithCategories();
-    return Response.json({ domains });
+    const topics = getAllTopics();
+    const goals = getAllGoals();
+    return Response.json({ domains, topics, goals });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }

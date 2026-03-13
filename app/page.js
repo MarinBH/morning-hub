@@ -90,8 +90,15 @@ export default function CommandCenter() {
           setJournal={setJournal}
           addCapture={addCapture}
           setBreathworkDone={setBreathworkDone}
+          setBreathworkSkipped={setBreathworkSkipped}
           habitConfig={habitConfig}
           knowledge={knowledge}
+          flowStep={flowStep}
+          setFlowStep={setFlowStep}
+          flowCelebrating={flowCelebrating}
+          setFlowCelebrating={setFlowCelebrating}
+          flowCollapsed={flowCollapsed}
+          setFlowCollapsed={setFlowCollapsed}
         />
         </ErrorBoundary>
         </WheelOfLifeProvider>
@@ -105,7 +112,7 @@ export default function CommandCenter() {
 function AppShell({
   tab, setTab, captureOpen, setCaptureOpen, paletteOpen, setPaletteOpen,
   committed, onCommit, habits, journal, captures, breathworkDone, momentumScore, streakDays,
-  toggleHabit, setJournal, addCapture, setBreathworkDone, habitConfig, knowledge,
+  toggleHabit, setJournal, addCapture, setBreathworkDone, setBreathworkSkipped, habitConfig, knowledge,
   flowStep, setFlowStep, flowCelebrating, setFlowCelebrating, flowCollapsed, setFlowCollapsed,
 }) {
   const { refetch: refetchTasks } = useTasks();
@@ -258,10 +265,11 @@ function AppShell({
 const containerStyle = {
   background: colors.bg,
   color: colors.text,
-  minHeight: '100vh',
+  height: '100dvh',
   maxWidth: 480,
   margin: '0 auto',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
+  overflow: 'hidden',
 };

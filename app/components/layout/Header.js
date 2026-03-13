@@ -7,11 +7,17 @@ export default function Header({ momentumScore = 0, captureCount = 0, streakDays
   return (
     <div
       style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
         padding: `${spacing.lg}px ${spacing.xl}px ${spacing.md}px`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         borderBottom: `1px solid ${colors.borderLight}`,
+        background: 'rgba(18,17,16,0.92)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
       }}
     >
       <div style={{ flex: 1 }}>

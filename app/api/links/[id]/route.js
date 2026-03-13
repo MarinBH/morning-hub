@@ -1,4 +1,4 @@
-import { getItemById, updateItem } from "../../../../lib/db.js";
+import { getItemById, updateItem, deleteItem } from "../../../../lib/db.js";
 import fs from "fs";
 import path from "path";
 
@@ -69,6 +69,21 @@ export async function PATCH(request, { params }) {
     // Strip large content columns from response
     const { markdown_content, json_artifact, raw_content, ...fields } = updated;
     return Response.json(fields);
+  } catch (err) {
+    return Response.json({ error: err.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = await params;
+    const item = await getItemById(Number(id));
+    if (!item) {
+      return Response.json({ error: "Item not found" }, { status: 404 });
+    }
+
+    await deleteItem(Number(id));
+    return Response.json({ success: true, deleted: { id: item.id, title: item.title } });
   } catch (err) {
     return Response.json({ error: err.message }, { status: 500 });
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CONTENT_FORMAT_LABELS, DIFFICULTY_STYLES, SOURCE_TYPE_STYLES } from "./constants";
 import MarkdownRenderer from "./MarkdownRenderer";
 
@@ -20,6 +20,15 @@ export default function LinkDetail({ item, detail, notes, onNotesChange, onBack 
   const json = detail?.jsonArtifact;
   const categories = detail?.categories || item.categories || [];
   const [expandedActions, setExpandedActions] = useState({});
+
+  // Escape key closes detail view
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onBack();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onBack]);
 
   const source = json?.source || {};
   const summary = json?.summary || {};

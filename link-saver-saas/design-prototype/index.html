@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Link Saver SaaS - Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Geist:wght@100..900&family=Inter:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES — PALETTE SYSTEM
+   ═══════════════════════════════════════════════════════ */
+:root {
+  /* Palette A: Warm Navy (default) */
+  --bg: #0F1219;
+  --surface: #1A1F2E;
+  --surface-hover: #232940;
+  --border: #2A3048;
+  --accent: #3A7BF6;
+  --accent-hover: #5A93FF;
+  --accent-subtle: rgba(58,123,246,0.12);
+  --text: #F5F3F0;
+  --text-secondary: #C4C3CB;
+  --muted: #9B9AA3;
+  --success: #34D399;
+  --success-subtle: rgba(52,211,153,0.12);
+  --error: #F87171;
+  --error-subtle: rgba(248,113,113,0.12);
+  --warning: #FBBF24;
+  --shadow: rgba(0,0,0,0.35);
+
+  /* Typography — default to Geist */
+  --font-primary: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}
+
+/* Palette B: Warm Charcoal */
+[data-palette="charcoal"] {
+  --bg: #1C1917;
+  --surface: #292524;
+  --surface-hover: #342E2A;
+  --border: #3D3530;
+  --accent: #D4A574;
+  --accent-hover: #E0B98E;
+  --accent-subtle: rgba(212,165,116,0.12);
+  --text: #F5F5F4;
+  --text-secondary: #D6D3D1;
+  --muted: #A8A29E;
+  --success: #86EFAC;
+  --success-subtle: rgba(134,239,172,0.12);
+  --error: #FCA5A5;
+  --error-subtle: rgba(252,165,165,0.12);
+  --warning: #FCD34D;
+  --shadow: rgba(0,0,0,0.4);
+}
+
+/* Palette C: Deep Purple */
+[data-palette="purple"] {
+  --bg: #13111C;
+  --surface: #1E1D2B;
+  --surface-hover: #282738;
+  --border: #332F48;
+  --accent: #8B6CC1;
+  --accent-hover: #A185D4;
+  --accent-subtle: rgba(139,108,193,0.12);
+  --text: #F0EDE6;
+  --text-secondary: #CBC6BE;
+  --muted: #8E8C99;
+  --success: #6EE7B7;
+  --success-subtle: rgba(110,231,183,0.12);
+  --error: #FB7185;
+  --error-subtle: rgba(251,113,133,0.12);
+  --warning: #FDE68A;
+  --shadow: rgba(0,0,0,0.4);
+}
+
+/* Font families */
+[data-font="geist"] { --font-primary: 'Geist', -apple-system, sans-serif; }
+[data-font="inter"] { --font-primary: 'Inter', -apple-system, sans-serif; }
+[data-font="dm-sans"] { --font-primary: 'DM Sans', -apple-system, sans-serif; }
+[data-font="jakarta"] { --font-primary: 'Plus Jakarta Sans', -apple-system, sans-serif; }
+[data-font="outfit"] { --font-primary: 'Outfit', -apple-system, sans-serif; }
+
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--font-primary);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--accent); text-decoration: none; }
+
+/* ═══════════════════════════════════════════════════════
+   CONTROL PANEL (sticky top)
+   ═══════════════════════════════════════════════════════ */
+.control-panel {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.control-panel h1 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.control-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.control-row:last-child { margin-bottom: 0; }
+.control-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 100%;
+  margin-bottom: 2px;
+}
+.pill {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-primary);
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.pill:hover { background: var(--surface-hover); color: var(--text-secondary); }
+.pill.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Color dots in palette pills */
+.pill .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION NAVIGATION
+   ═══════════════════════════════════════════════════════ */
+.section-nav {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  background: var(--bg);
+  position: sticky;
+  top: 108px;
+  z-index: 90;
+  border-bottom: 1px solid var(--border);
+}
+.section-nav::-webkit-scrollbar { display: none; }
+.section-nav a {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.section-nav a:hover, .section-nav a:active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════════════════════ */
+.section {
+  padding: 32px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.section-subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.subsection { margin-bottom: 28px; }
+.subsection-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COLOR SWATCHES
+   ═══════════════════════════════════════════════════════ */
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+.swatch {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.swatch-color {
+  height: 56px;
+  display: flex;
+  align-items: flex-end;
+  padding: 6px 8px;
+}
+.swatch-label {
+  padding: 8px;
+  background: var(--surface);
+  font-size: 11px;
+}
+.swatch-label .name {
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+}
+.swatch-label .hex {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TYPOGRAPHY SHOWCASE
+   ═══════════════════════════════════════════════════════ */
+.type-sample { margin-bottom: 16px; }
+.type-sample .label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--muted);
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.type-display { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; }
+.type-h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+.type-h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; }
+.type-h3 { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.35; }
+.type-body { font-size: 15px; font-weight: 400; line-height: 1.6; color: var(--text-secondary); }
+.type-small { font-size: 13px; font-weight: 400; line-height: 1.5; color: var(--muted); }
+.type-micro { font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--muted); }
+.type-mono { font-family: var(--font-mono); font-size: 13px; color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════
+   COMPONENTS
+   ═══════════════════════════════════════════════════════ */
+
+/* Buttons */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-primary);
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--surface-hover); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-ghost:hover { background: var(--surface); color: var(--text); }
+.btn-danger { background: var(--error-subtle); color: var(--error); }
+.btn-sm { padding: 6px 14px; font-size: 12px; border-radius: var(--radius-sm); }
+
+/* Inputs */
+.input-group { margin-bottom: 12px; }
+.input-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-primary);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.input::placeholder { color: var(--muted); }
+.input:focus { border-color: var(--accent); }
+
+.input-with-icon {
+  position: relative;
+}
+.input-with-icon .input { padding-left: 40px; }
+.input-with-icon .icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+
+/* Tags */
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+.tag-muted {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.tag-success {
+  background: var(--success-subtle);
+  color: var(--success);
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+.card:hover {
+  border-color: color-mix(in srgb, var(--border) 50%, var(--accent) 50%);
+  box-shadow: 0 4px 24px var(--shadow);
+}
+.card-body { padding: 14px; }
+.card-image {
+  width: 100%;
+  height: 180px;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 13px;
+  position: relative;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-tldr {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+}
+.card-meta .sep { opacity: 0.4; }
+
+/* Badge overlay */
+.badge-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.badge-video { background: rgba(239,68,68,0.85); color: #fff; }
+.badge-article { background: rgba(59,130,246,0.85); color: #fff; }
+.badge-place { background: rgba(52,211,153,0.85); color: #fff; }
+
+/* Duration badge */
+.duration-badge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN MOCKUPS
+   ═══════════════════════════════════════════════════════ */
+.phone-frame {
+  max-width: 390px;
+  margin: 0 auto 28px;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--border);
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: 0 8px 40px var(--shadow);
+}
+.phone-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+.phone-content { min-height: 600px; }
+
+/* Bottom Navigation */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 0 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  min-width: 60px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.nav-item.active { color: var(--accent); }
+.nav-item svg { width: 22px; height: 22px; }
+
+/* Screen header */
+.screen-header {
+  padding: 12px 16px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.screen-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Feed grid */
+.feed { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Save flow */
+.save-input-area {
+  padding: 16px;
+}
+.save-url-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-primary);
+  outline: none;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.save-url-input:focus {
+  border-color: var(--accent);
+  border-style: solid;
+  background: var(--surface-hover);
+}
+
+/* Processing steps */
+.process-steps { padding: 16px; }
+.process-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14px;
+}
+.process-step .step-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.step-done .step-icon { background: var(--success-subtle); color: var(--success); }
+.step-active .step-icon { background: var(--accent-subtle); color: var(--accent); }
+.step-pending .step-icon { background: var(--surface); color: var(--muted); }
+.step-active { color: var(--text); font-weight: 500; }
+.step-pending { color: var(--muted); }
+
+/* Detail view */
+.detail-header { padding: 16px; }
+.detail-thumbnail {
+  width: 100%;
+  height: 200px;
+  background: var(--surface-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 13px;
+  position: relative;
+}
+.detail-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.detail-section {
+  padding: 0 16px 20px;
+}
+.detail-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.detail-tldr {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 12px;
+  background: var(--accent-subtle);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--accent);
+  margin-bottom: 16px;
+}
+.takeaway-list { list-style: none; }
+.takeaway-list li {
+  padding: 8px 0;
+  padding-left: 20px;
+  position: relative;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.takeaway-list li:last-child { border-bottom: none; }
+.takeaway-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
+}
+
+/* Place card specific */
+.place-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--warning);
+}
+.place-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.place-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.place-info-row svg { width: 14px; height: 14px; color: var(--muted); flex-shrink: 0; }
+
+/* Search filter chips */
+.filter-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 16px 12px;
+  scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Screen label */
+.screen-label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+/* Action quote block */
+.action-block {
+  padding: 10px 12px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  border-left: 3px solid var(--success);
+}
+.action-block .action-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.action-block .action-why {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+/* Pulse animation for processing */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-pulse { animation: pulse 1.5s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════════════
+   SVG ICONS (inline)
+   ═══════════════════════════════════════════════════════ */
+.icon-sm { width: 16px; height: 16px; }
+.icon-md { width: 20px; height: 20px; }
+
+</style>
+</head>
+<body data-palette="navy" data-font="geist">
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTROL PANEL
+     ═══════════════════════════════════════════════════════ -->
+<div class="control-panel">
+  <h1>Link Saver - Design System</h1>
+  <div class="control-row">
+    <span class="control-label">Palette</span>
+    <button class="pill active" onclick="setPalette('navy', this)"><span class="dot" style="background:#3A7BF6"></span>Navy</button>
+    <button class="pill" onclick="setPalette('charcoal', this)"><span class="dot" style="background:#D4A574"></span>Charcoal</button>
+    <button class="pill" onclick="setPalette('purple', this)"><span class="dot" style="background:#8B6CC1"></span>Purple</button>
+  </div>
+  <div class="control-row">
+    <span class="control-label">Font</span>
+    <button class="pill active" onclick="setFont('geist', this)">Geist</button>
+    <button class="pill" onclick="setFont('inter', this)">Inter</button>
+    <button class="pill" onclick="setFont('dm-sans', this)">DM Sans</button>
+    <button class="pill" onclick="setFont('jakarta', this)">Jakarta</button>
+    <button class="pill" onclick="setFont('outfit', this)">Outfit</button>
+  </div>
+</div>
+
+<!-- Section Navigation -->
+<nav class="section-nav">
+  <a href="#colors">Colors</a>
+  <a href="#typography">Typography</a>
+  <a href="#components">Components</a>
+  <a href="#screen-knowledge">Knowledge</a>
+  <a href="#screen-places">Places</a>
+  <a href="#screen-save">Save Flow</a>
+  <a href="#screen-detail">Detail</a>
+  <a href="#screen-place-detail">Place Detail</a>
+  <a href="#screen-search">Search</a>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     1. COLORS
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="colors">
+  <h2 class="section-title">Color System</h2>
+  <p class="section-subtitle">Switch palettes above to compare. All components update live.</p>
+
+  <div class="swatch-grid">
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--bg)"></div>
+      <div class="swatch-label"><span class="name">Background</span><span class="hex">--bg</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--surface)"></div>
+      <div class="swatch-label"><span class="name">Surface</span><span class="hex">--surface</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--accent)"></div>
+      <div class="swatch-label"><span class="name">Accent</span><span class="hex">--accent</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--text); border: 1px solid var(--border)"></div>
+      <div class="swatch-label"><span class="name">Text</span><span class="hex">--text</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--muted)"></div>
+      <div class="swatch-label"><span class="name">Muted</span><span class="hex">--muted</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--success)"></div>
+      <div class="swatch-label"><span class="name">Success</span><span class="hex">--success</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--error)"></div>
+      <div class="swatch-label"><span class="name">Error</span><span class="hex">--error</span></div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-color" style="background: var(--warning)"></div>
+      <div class="swatch-label"><span class="name">Warning</span><span class="hex">--warning</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     2. TYPOGRAPHY
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="typography">
+  <h2 class="section-title">Typography Scale</h2>
+  <p class="section-subtitle">Switch fonts above. Each resets all text on this page.</p>
+
+  <div class="type-sample">
+    <div class="label">Display / 32px Bold</div>
+    <div class="type-display">Save Smarter. Find Faster.</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">H1 / 24px Bold</div>
+    <div class="type-h1">Your Knowledge Library</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">H2 / 20px Semibold</div>
+    <div class="type-h2">Key Takeaways</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">H3 / 16px Semibold</div>
+    <div class="type-h3">How sleep affects cognitive performance</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">Body / 15px Regular</div>
+    <div class="type-body">Stanford neuroscientist specializing in brain optimization and sleep research. Leading expert on circadian rhythms and their impact on learning and memory consolidation.</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">Small / 13px Regular</div>
+    <div class="type-small">8 min read &middot; Huberman Lab &middot; Mar 13, 2026</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">Micro / 11px Medium</div>
+    <div class="type-micro">ARTICLE &middot; INTERMEDIATE &middot; 2,340 WORDS</div>
+  </div>
+  <div class="type-sample">
+    <div class="label">Mono / 13px JetBrains Mono</div>
+    <div class="type-mono">youtube.com/watch?v=abc123</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     3. COMPONENTS
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="components">
+  <h2 class="section-title">Components</h2>
+  <p class="section-subtitle">Building blocks for the app interface.</p>
+
+  <!-- Buttons -->
+  <div class="subsection">
+    <div class="subsection-title">Buttons</div>
+    <div class="btn-row">
+      <button class="btn btn-primary">Save Link</button>
+      <button class="btn btn-secondary">Cancel</button>
+      <button class="btn btn-ghost">Skip</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-sm">Pro</button>
+      <button class="btn btn-danger btn-sm">Delete</button>
+      <button class="btn btn-secondary btn-sm">Export</button>
+    </div>
+  </div>
+
+  <!-- Inputs -->
+  <div class="subsection">
+    <div class="subsection-title">Inputs</div>
+    <div class="input-group">
+      <label class="input-label">Paste a link</label>
+      <input class="input" type="text" placeholder="https://youtube.com/watch?v=...">
+    </div>
+    <div class="input-group">
+      <label class="input-label">Search your links</label>
+      <input class="input" type="text" placeholder="Search by title, tag, or content...">
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <div class="subsection">
+    <div class="subsection-title">Tags</div>
+    <div class="tag-row" style="margin-bottom: 8px;">
+      <span class="tag">productivity</span>
+      <span class="tag">sleep science</span>
+      <span class="tag">habits</span>
+      <span class="tag">neuroscience</span>
+    </div>
+    <div class="tag-row" style="margin-bottom: 8px;">
+      <span class="tag-muted tag">tutorial</span>
+      <span class="tag-muted tag">intermediate</span>
+      <span class="tag-muted tag">8 min</span>
+    </div>
+    <div class="tag-row">
+      <span class="tag-success tag">actionable</span>
+      <span class="tag-success tag">research-backed</span>
+    </div>
+  </div>
+
+  <!-- Cards (mini) -->
+  <div class="subsection">
+    <div class="subsection-title">Cards</div>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <!-- Article card -->
+      <div class="card">
+        <div class="card-image" style="height: 120px; background: linear-gradient(135deg, var(--surface-hover), var(--surface));">
+          <span class="badge-overlay badge-article">Article</span>
+          <span style="opacity:0.5">Article Thumbnail</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">The Science of Deep Work in the Age of AI Distractions</div>
+          <div class="card-tldr">Cal Newport's framework for achieving flow state by structuring work blocks around cognitive energy peaks.</div>
+          <div class="tag-row" style="margin-bottom: 8px;">
+            <span class="tag">deep work</span>
+            <span class="tag">focus</span>
+            <span class="tag">productivity</span>
+          </div>
+          <div class="card-meta">
+            <span>Cal Newport</span>
+            <span class="sep">&middot;</span>
+            <span>6 min read</span>
+            <span class="sep">&middot;</span>
+            <span>Mar 10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- YouTube card -->
+      <div class="card">
+        <div class="card-image" style="height: 120px; background: linear-gradient(135deg, #1a1a2e, #16213e);">
+          <span class="badge-overlay badge-video">Video</span>
+          <span class="duration-badge">12:34</span>
+          <span style="opacity:0.5">Video Thumbnail</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Optimize Your Morning Routine for Peak Performance</div>
+          <div class="card-tldr">Huberman breaks down the neuroscience of morning sunlight exposure and its 14-hour impact on cortisol timing.</div>
+          <div class="tag-row" style="margin-bottom: 8px;">
+            <span class="tag">morning routine</span>
+            <span class="tag">cortisol</span>
+            <span class="tag">sunlight</span>
+          </div>
+          <div class="card-meta">
+            <span>Huberman Lab</span>
+            <span class="sep">&middot;</span>
+            <span>12:34</span>
+            <span class="sep">&middot;</span>
+            <span>Mar 8</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1: KNOWLEDGE FEED
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="screen-knowledge">
+  <div class="screen-label">Screen 1 &mdash; Knowledge Feed</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar">
+      <span>9:41</span>
+      <span style="font-size:10px">&#9679;&#9679;&#9679;&#9679; WiFi</span>
+    </div>
+    <div class="phone-content">
+      <div class="screen-header">
+        <h2>Knowledge</h2>
+        <button class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 13px;">+ Save</button>
+      </div>
+
+      <div class="filter-chips">
+        <span class="chip active">All</span>
+        <span class="chip">Articles</span>
+        <span class="chip">Videos</span>
+        <span class="chip">Favorites</span>
+        <span class="chip">This Week</span>
+      </div>
+
+      <div class="feed">
+        <!-- Card 1: Article -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+              <span class="type-micro">ARTICLE &middot; 6 MIN</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="card-title">The Science of Deep Work in the Age of AI</div>
+            <div class="card-tldr">Cal Newport's framework for flow state by structuring work blocks around cognitive energy peaks.</div>
+            <div class="tag-row" style="margin-bottom: 8px;">
+              <span class="tag">deep work</span>
+              <span class="tag">focus</span>
+              <span class="tag">productivity</span>
+            </div>
+            <div class="card-meta">
+              <span>Cal Newport</span>
+              <span class="sep">&middot;</span>
+              <span>Mar 10</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: YouTube -->
+        <div class="card">
+          <div class="card-image" style="height: 160px; background: linear-gradient(135deg, #1a1a2e, #16213e);">
+            <span class="badge-overlay badge-video">Video</span>
+            <span class="duration-badge">1:42:15</span>
+            <span style="opacity:0.3; font-size:32px;">&#9654;</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Optimize Your Morning Routine for Peak Performance</div>
+            <div class="card-tldr">Morning sunlight within 30 min of waking triggers a cortisol pulse that sets your entire circadian rhythm for 14+ hours.</div>
+            <div class="tag-row" style="margin-bottom: 8px;">
+              <span class="tag">morning routine</span>
+              <span class="tag">cortisol</span>
+            </div>
+            <div class="card-meta">
+              <span>Huberman Lab</span>
+              <span class="sep">&middot;</span>
+              <span>Mar 8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Article compact -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+              <span class="type-micro">ARTICLE &middot; 12 MIN</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="var(--accent)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="card-title">How to Build a Micro SaaS in 2026: A Complete Guide</div>
+            <div class="card-tldr">Focus on one painful problem for a specific niche. Usage-based pricing grows 38% faster than flat subscriptions.</div>
+            <div class="tag-row" style="margin-bottom: 8px;">
+              <span class="tag">micro saas</span>
+              <span class="tag">startup</span>
+              <span class="tag">pricing</span>
+            </div>
+            <div class="card-meta">
+              <span>IndieHackers</span>
+              <span class="sep">&middot;</span>
+              <span>Mar 5</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Knowledge</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Places</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2: PLACES FEED
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="screen-places">
+  <div class="screen-label">Screen 2 &mdash; Places Feed</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar">
+      <span>9:41</span>
+      <span style="font-size:10px">&#9679;&#9679;&#9679;&#9679; WiFi</span>
+    </div>
+    <div class="phone-content">
+      <div class="screen-header">
+        <h2>Places</h2>
+        <button class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 13px;">+ Save</button>
+      </div>
+
+      <div class="filter-chips">
+        <span class="chip active">All</span>
+        <span class="chip">Restaurants</span>
+        <span class="chip">Hotels</span>
+        <span class="chip">Attractions</span>
+        <span class="chip">Saved Trips</span>
+      </div>
+
+      <div class="feed">
+        <!-- Place 1: Restaurant -->
+        <div class="card">
+          <div class="card-image" style="height:140px; background: linear-gradient(135deg, #2d1b00, #1a1a2e);">
+            <span class="badge-overlay badge-place">Restaurant</span>
+            <span style="opacity:0.3; font-size:28px;">&#127860;</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Sugarfish by Sushi Nozawa</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <span class="place-rating">&#9733; 4.6</span>
+              <span style="font-size:12px; color:var(--muted)">2,341 reviews</span>
+              <span style="font-size:12px; color:var(--muted)">&middot; $$$</span>
+            </div>
+            <div class="place-info" style="margin-bottom:10px;">
+              <div class="place-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>212 N Canon Dr, Beverly Hills</span>
+              </div>
+              <div class="place-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <span style="color:var(--success)">Open</span><span>&middot; Closes 9:30 PM</span>
+              </div>
+            </div>
+            <div class="card-tldr">High-end omakase-style sushi known for the "Trust Me" lunch set ($27). Minimal decor, focus entirely on fish quality.</div>
+            <div class="tag-row" style="margin-top:8px;">
+              <span class="tag">sushi</span>
+              <span class="tag">beverly hills</span>
+              <span class="tag">date night</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Place 2: Hotel -->
+        <div class="card">
+          <div class="card-image" style="height:140px; background: linear-gradient(135deg, #0a2540, #1a1a2e);">
+            <span class="badge-overlay badge-place">Hotel</span>
+            <span style="opacity:0.3; font-size:28px;">&#127976;</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Aman Tokyo</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <span class="place-rating">&#9733; 4.8</span>
+              <span style="font-size:12px; color:var(--muted)">890 reviews</span>
+              <span style="font-size:12px; color:var(--muted)">&middot; $$$$</span>
+            </div>
+            <div class="card-tldr">Minimalist luxury hotel in Otemachi. Japanese paper and camphor wood rooms. The spa has a 30m pool with city views.</div>
+            <div class="tag-row" style="margin-top:8px;">
+              <span class="tag">tokyo</span>
+              <span class="tag">luxury hotel</span>
+              <span class="tag">japan trip</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Place 3: Attraction -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+              <span class="type-micro">ATTRACTION</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--accent)" stroke="var(--accent)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="card-title">TeamLab Borderless</div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+              <span class="place-rating">&#9733; 4.7</span>
+              <span style="font-size:12px; color:var(--muted)">Azabudai Hills, Tokyo</span>
+            </div>
+            <div class="card-tldr">Immersive digital art museum. Book online 2-3 weeks in advance. Weekday mornings are least crowded.</div>
+            <div class="tag-row" style="margin-top:8px;">
+              <span class="tag">tokyo</span>
+              <span class="tag">art museum</span>
+              <span class="tag">must-visit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Knowledge</span>
+      </div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Places</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 3: SAVE FLOW
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="screen-save">
+  <div class="screen-label">Screen 3 &mdash; Save Flow</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar">
+      <span>9:41</span>
+      <span style="font-size:10px">&#9679;&#9679;&#9679;&#9679; WiFi</span>
+    </div>
+    <div class="phone-content">
+      <div class="screen-header">
+        <h2>Save a Link</h2>
+      </div>
+
+      <div class="save-input-area">
+        <input class="save-url-input" type="text" placeholder="Paste any URL here..." value="https://youtube.com/watch?v=abc123" readonly>
+        <div style="text-align:center; margin-top:12px;">
+          <button class="btn btn-primary" style="width:100%;">Save & Analyze</button>
+        </div>
+      </div>
+
+      <div class="process-steps">
+        <div class="subsection-title" style="margin-bottom:14px;">Processing</div>
+
+        <div class="process-step step-done">
+          <span class="step-icon">&#10003;</span>
+          <span>Detected: <strong>YouTube Video</strong></span>
+        </div>
+        <div class="process-step step-done">
+          <span class="step-icon">&#10003;</span>
+          <span>Extracted metadata & transcript</span>
+        </div>
+        <div class="process-step step-active">
+          <span class="step-icon animate-pulse">&#9679;</span>
+          <span>Generating AI summary...</span>
+        </div>
+        <div class="process-step step-pending">
+          <span class="step-icon">4</span>
+          <span>Auto-tagging & categorizing</span>
+        </div>
+        <div class="process-step step-pending">
+          <span class="step-icon">5</span>
+          <span>Saving to your library</span>
+        </div>
+      </div>
+
+      <!-- Preview of detected content -->
+      <div style="padding: 16px;">
+        <div class="card">
+          <div class="card-image" style="height:140px; background: linear-gradient(135deg, #1a1a2e, #16213e);">
+            <span class="badge-overlay badge-video">Video</span>
+            <span class="duration-badge">1:42:15</span>
+            <span style="opacity:0.3; font-size:32px;">&#9654;</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Optimize Your Morning Routine for Peak Performance</div>
+            <div class="card-meta">
+              <span>Huberman Lab</span>
+              <span class="sep">&middot;</span>
+              <span>12.3M subscribers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Knowledge</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Places</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 4: KNOWLEDGE DETAIL
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="screen-detail">
+  <div class="screen-label">Screen 4 &mdash; Knowledge Detail</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar">
+      <span>9:41</span>
+      <span style="font-size:10px">&#9679;&#9679;&#9679;&#9679; WiFi</span>
+    </div>
+    <div class="phone-content">
+      <div class="detail-thumbnail" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+        <span class="badge-overlay badge-video">Video</span>
+        <span class="duration-badge">1:42:15</span>
+        <span style="opacity:0.3; font-size: 40px;">&#9654;</span>
+      </div>
+
+      <div class="detail-header">
+        <div class="type-micro" style="margin-bottom:6px;">HUBERMAN LAB &middot; 1:42:15 &middot; MAR 8, 2026</div>
+        <div class="detail-title">Optimize Your Morning Routine for Peak Performance</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">
+          Stanford neuroscientist specializing in brain optimization and sleep research.
+        </div>
+        <div class="tag-row">
+          <span class="tag">morning routine</span>
+          <span class="tag">cortisol</span>
+          <span class="tag">sunlight</span>
+          <span class="tag">circadian</span>
+        </div>
+      </div>
+
+      <!-- TLDR -->
+      <div class="detail-section">
+        <div class="detail-section-title">TLDR</div>
+        <div class="detail-tldr">
+          Morning sunlight within 30 minutes of waking triggers a cortisol pulse that sets your entire circadian rhythm for the next 14+ hours.
+        </div>
+      </div>
+
+      <!-- Key Takeaways -->
+      <div class="detail-section">
+        <div class="detail-section-title">Key Takeaways</div>
+        <ul class="takeaway-list">
+          <li>Get 5-10 minutes of direct sunlight within 30 minutes of waking — even on cloudy days (10x more lux than indoor lighting)</li>
+          <li>The cortisol pulse from morning light exposure is beneficial and distinct from chronic stress cortisol</li>
+          <li>Caffeine should be delayed 90-120 minutes after waking to avoid afternoon crash</li>
+          <li>Cold exposure (1-3 min cold shower) increases dopamine by 250% for 3+ hours</li>
+        </ul>
+      </div>
+
+      <!-- Actions -->
+      <div class="detail-section">
+        <div class="detail-section-title">Actions</div>
+        <div class="action-block">
+          <div class="action-title">Get outdoor sunlight within 30 min of waking</div>
+          <div class="action-why">Triggers the cortisol pulse that anchors your circadian clock for 14+ hours, improving sleep onset that night by 30-45 min.</div>
+        </div>
+        <div class="action-block">
+          <div class="action-title">Delay caffeine 90-120 min after waking</div>
+          <div class="action-why">Allows natural cortisol to clear adenosine first, preventing the afternoon crash that occurs when caffeine wears off before adenosine is cleared.</div>
+        </div>
+      </div>
+
+      <!-- Concepts -->
+      <div class="detail-section">
+        <div class="detail-section-title">Concepts</div>
+        <div class="tag-row">
+          <span class="tag-muted tag">circadian entrainment</span>
+          <span class="tag-muted tag">hormesis</span>
+          <span class="tag-muted tag">dopamine regulation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 5: PLACE DETAIL
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="screen-place-detail">
+  <div class="screen-label">Screen 5 &mdash; Place Detail</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar">
+      <span>9:41</span>
+      <span style="font-size:10px">&#9679;&#9679;&#9679;&#9679; WiFi</span>
+    </div>
+    <div class="phone-content">
+      <div class="detail-thumbnail" style="background: linear-gradient(135deg, #2d1b00, #1a1a2e);">
+        <span class="badge-overlay badge-place">Restaurant</span>
+        <span style="opacity:0.3; font-size:40px;">&#127860;</span>
+      </div>
+
+      <div class="detail-header">
+        <div class="type-micro" style="margin-bottom:6px;">RESTAURANT &middot; BEVERLY HILLS &middot; $$$</div>
+        <div class="detail-title">Sugarfish by Sushi Nozawa</div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+          <span class="place-rating" style="font-size:16px;">&#9733; 4.6</span>
+          <span style="font-size:13px; color:var(--muted)">2,341 reviews on Google</span>
+        </div>
+        <div class="tag-row">
+          <span class="tag">sushi</span>
+          <span class="tag">beverly hills</span>
+          <span class="tag">date night</span>
+          <span class="tag">omakase</span>
+        </div>
+      </div>
+
+      <!-- Quick Info -->
+      <div class="detail-section">
+        <div class="detail-section-title">Details</div>
+        <div class="place-info" style="gap:10px;">
+          <div class="place-info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>212 N Canon Dr, Beverly Hills, CA 90210</span>
+          </div>
+          <div class="place-info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <span><span style="color:var(--success); font-weight:500;">Open</span> &middot; 11:30 AM - 9:30 PM</span>
+          </div>
+          <div class="place-info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg>
+            <span>(310) 275-5551</span>
+          </div>
+          <div class="place-info-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span style="color:var(--accent)">sugarfishsushi.com</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Notes from website -->
+      <div class="detail-section">
+        <div class="detail-section-title">AI Notes (from website)</div>
+        <div class="detail-tldr">
+          High-end omakase-style sushi chain founded by legendary sushi chef Kazunori Nozawa. Known for the "Trust Me" lunch set ($27) and "Nozawa" dinner set.
+        </div>
+        <ul class="takeaway-list">
+          <li>The "Trust Me" lunch set is the signature — 6 courses of chef's choice for $27</li>
+          <li>No substitutions, no California rolls — traditional Edo-style sushi only</li>
+          <li>Reservations available but walk-ins accepted. Peak wait: 30-45 min on weekends</li>
+          <li>Multiple locations across LA — this is the original Beverly Hills location</li>
+        </ul>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="detail-section">
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary" style="flex:1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Open in Maps
+          </button>
+          <button class="btn btn-secondary" style="flex:1;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Visit Website
+          </button>
+        </div>
+      </div>
+
+      <!-- Personal notes -->
+      <div class="detail-section">
+        <div class="detail-section-title">Your Notes</div>
+        <div style="padding:12px; background:var(--surface); border-radius:var(--radius-md); border:1px dashed var(--border); color:var(--muted); font-size:13px; text-align:center;">
+          Tap to add a personal note...
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 6: SEARCH
+     ═══════════════════════════════════════════════════════ -->
+<section class="section" id="screen-search">
+  <div class="screen-label">Screen 6 &mdash; Search & Filter</div>
+  <div class="phone-frame">
+    <div class="phone-status-bar">
+      <span>9:41</span>
+      <span style="font-size:10px">&#9679;&#9679;&#9679;&#9679; WiFi</span>
+    </div>
+    <div class="phone-content">
+      <div style="padding:12px 16px;">
+        <div class="input-with-icon">
+          <span class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <input class="input" type="text" value="morning routine" style="padding-left:40px;" readonly>
+        </div>
+      </div>
+
+      <div class="filter-chips">
+        <span class="chip active">All</span>
+        <span class="chip">Knowledge</span>
+        <span class="chip">Places</span>
+        <span class="chip">Articles</span>
+        <span class="chip">Videos</span>
+        <span class="chip">This Month</span>
+      </div>
+
+      <div style="padding:0 16px 8px; font-size:12px; color:var(--muted);">
+        3 results for "morning routine"
+      </div>
+
+      <div class="feed">
+        <!-- Result 1 -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+              <span class="type-micro">VIDEO &middot; 1:42:15</span>
+              <span class="place-rating" style="font-size:11px;">Best match</span>
+            </div>
+            <div class="card-title">Optimize Your <mark style="background:var(--accent-subtle); color:var(--accent); padding:0 2px; border-radius:2px;">Morning Routine</mark> for Peak Performance</div>
+            <div class="card-tldr"><mark style="background:var(--accent-subtle); color:var(--accent); padding:0 2px; border-radius:2px;">Morning</mark> sunlight within 30 min of waking triggers a cortisol pulse...</div>
+            <div class="tag-row" style="margin-top:8px;">
+              <span class="tag">morning routine</span>
+              <span class="tag">cortisol</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result 2 -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+              <span class="type-micro">ARTICLE &middot; 8 MIN</span>
+            </div>
+            <div class="card-title">5 <mark style="background:var(--accent-subtle); color:var(--accent); padding:0 2px; border-radius:2px;">Morning</mark> Habits That Changed My Productivity</div>
+            <div class="card-tldr">A year-long experiment with different <mark style="background:var(--accent-subtle); color:var(--accent); padding:0 2px; border-radius:2px;">morning routines</mark> revealed that consistency matters more than content.</div>
+            <div class="tag-row" style="margin-top:8px;">
+              <span class="tag">habits</span>
+              <span class="tag">productivity</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result 3 -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 4px;">
+              <span class="type-micro">VIDEO &middot; 24:10</span>
+            </div>
+            <div class="card-title">The Perfect <mark style="background:var(--accent-subtle); color:var(--accent); padding:0 2px; border-radius:2px;">Morning Routine</mark> Doesn't Exist — Do This Instead</div>
+            <div class="card-tldr">Tim Ferriss argues against rigid <mark style="background:var(--accent-subtle); color:var(--accent); padding:0 2px; border-radius:2px;">morning routines</mark> and proposes a flexible "morning questions" approach.</div>
+            <div class="tag-row" style="margin-top:8px;">
+              <span class="tag">morning routine</span>
+              <span class="tag">flexibility</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <span>Knowledge</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span>Places</span>
+      </div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════ -->
+<script>
+function setPalette(name, btn) {
+  document.body.setAttribute('data-palette', name);
+  document.querySelectorAll('.control-row')[0].querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setFont(name, btn) {
+  document.body.setAttribute('data-font', name);
+  document.querySelectorAll('.control-row')[1].querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Smooth scroll for section nav
+document.querySelectorAll('.section-nav a').forEach(a => {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>

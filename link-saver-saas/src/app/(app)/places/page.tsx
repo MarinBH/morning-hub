@@ -28,6 +28,7 @@ const FILTER_CHIPS = [
 export default function PlacesPage() {
   const [places, setPlaces] = useState<PlaceData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
 
   const fetchPlaces = useCallback(async () => {
@@ -35,8 +36,10 @@ export default function PlacesPage() {
     const params = new URLSearchParams({ section: "places" });
 
     try {
+      setError("");
       const res = await fetch(`/api/links?${params}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load places");
       let items = data.links || [];
 
       if (filter) {
@@ -46,8 +49,8 @@ export default function PlacesPage() {
       }
 
       setPlaces(items);
-    } catch {
-      console.error("Failed to fetch places");
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -87,7 +90,14 @@ export default function PlacesPage() {
       </div>
 
       <div className="px-3 pb-4 space-y-2.5">
-        {loading ? (
+        {error ? (
+          <div className="text-center py-20">
+            <p className="text-error text-sm mb-2">{error}</p>
+            <button onClick={() => fetchPlaces()} className="text-accent text-sm hover:text-accent-hover">
+              Try again
+            </button>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="animate-spin text-muted" size={24} />
           </div>

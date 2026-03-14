@@ -14,13 +14,21 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const section = searchParams.get("section") || undefined;
   const type = searchParams.get("type") || undefined;
-  const search = searchParams.get("search") || undefined;
   const tag = searchParams.get("tag") || undefined;
   const favorite = searchParams.get("favorite") || undefined;
   const sort = searchParams.get("sort") || "newest";
-  const page = parseInt(searchParams.get("page") || "1", 10);
-  const limit = parseInt(searchParams.get("limit") || "20", 10);
+  const search = searchParams.get("search") || undefined;
+
+  let page = parseInt(searchParams.get("page") || "1", 10);
+  let limit = parseInt(searchParams.get("limit") || "20", 10);
+  if (isNaN(page) || page < 1) page = 1;
+  if (isNaN(limit) || limit < 1) limit = 20;
+  if (limit > 100) limit = 100;
   const offset = (page - 1) * limit;
+
+  if (search && search.length > 500) {
+    return NextResponse.json({ error: "Search query too long (max 500 chars)" }, { status: 400 });
+  }
 
   let query = supabase
     .from("links")

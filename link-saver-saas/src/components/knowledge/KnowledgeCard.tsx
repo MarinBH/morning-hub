@@ -49,7 +49,7 @@ export function KnowledgeCard({
           <div className="relative">
             <img
               src={thumbnail}
-              alt=""
+              alt={title}
               className="w-full h-40 object-cover"
               loading="lazy"
             />
@@ -74,6 +74,7 @@ export function KnowledgeCard({
                 e.stopPropagation();
                 onToggleFavorite?.(id);
               }}
+              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
               className="p-0.5"
             >
               {isFavorite ? (

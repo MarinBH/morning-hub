@@ -14,9 +14,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const rawUrl = body.url?.trim();
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
 
+  if (typeof body.url !== "string") {
+    return NextResponse.json({ error: "URL must be a string" }, { status: 400 });
+  }
+
+  const rawUrl = body.url.trim();
   if (!rawUrl || !isValidUrl(rawUrl)) {
     return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
   }
@@ -182,11 +191,9 @@ async function processPlace(supabase: any, linkId: string, userId: string, url: 
 async function saveTags(supabase: any, linkId: string, userId: string, tags: string[] | undefined, tagType: string) {
   if (!tags?.length) return;
 
-  for (const tagName of tags) {
-    const name = tagName.toLowerCase().trim();
-    if (!name) continue;
+  const uniqueNames = [...new Set(tags.map(t => t.toLowerCase().trim()).filter(Boolean))];
 
-    // Upsert tag
+  await Promise.all(uniqueNames.map(async (name) => {
     const { data: tag } = await supabase
       .from("tags")
       .upsert({ user_id: userId, name, tag_type: tagType }, { onConflict: "user_id,name,tag_type" })
@@ -198,7 +205,7 @@ async function saveTags(supabase: any, linkId: string, userId: string, tags: str
         .from("link_tags")
         .upsert({ link_id: linkId, tag_id: tag.id }, { onConflict: "link_id,tag_id" });
     }
-  }
+  }));
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

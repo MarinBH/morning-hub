@@ -31,6 +31,7 @@ const FILTER_CHIPS = [
 export default function KnowledgePage() {
   const [links, setLinks] = useState<LinkData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filter, setFilter] = useState("");
 
   const fetchLinks = useCallback(async () => {
@@ -43,11 +44,13 @@ export default function KnowledgePage() {
     }
 
     try {
+      setError("");
       const res = await fetch(`/api/links?${params}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to load links");
       setLinks(data.links || []);
-    } catch {
-      console.error("Failed to fetch links");
+    } catch (err) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -101,7 +104,14 @@ export default function KnowledgePage() {
       </div>
 
       <div className="px-3 pb-4 space-y-2.5">
-        {loading ? (
+        {error ? (
+          <div className="text-center py-20">
+            <p className="text-error text-sm mb-2">{error}</p>
+            <button onClick={() => fetchLinks()} className="text-accent text-sm hover:text-accent-hover">
+              Try again
+            </button>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="animate-spin text-muted" size={24} />
           </div>

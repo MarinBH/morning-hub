@@ -2,6 +2,7 @@ import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_RESPONSE_SIZE = 5 * 1024 * 1024; // 5MB
 const MIN_WORD_COUNT = 100;
 const MIN_CHAR_COUNT = 500;
 
@@ -117,5 +118,14 @@ async function fetchHtml(url: string): Promise<string> {
     throw new Error(`Failed to fetch article: HTTP ${res.status}`);
   }
 
-  return await res.text();
+  const contentLength = res.headers.get("content-length");
+  if (contentLength && parseInt(contentLength) > MAX_RESPONSE_SIZE) {
+    throw new Error("Article page too large");
+  }
+
+  const text = await res.text();
+  if (text.length > MAX_RESPONSE_SIZE) {
+    return text.substring(0, MAX_RESPONSE_SIZE);
+  }
+  return text;
 }

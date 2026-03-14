@@ -3,6 +3,32 @@ import { parseHTML } from "linkedom";
 import { extractMapsPlaceInfo } from "./detect";
 
 const FETCH_TIMEOUT_MS = 15000;
+const MAX_RESPONSE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const BLOCKED_HOSTNAMES = [
+  "localhost",
+  "127.0.0.1",
+  "0.0.0.0",
+  "169.254.169.254", // AWS metadata
+  "[::1]",
+];
+
+function isSafeUrl(urlStr: string): boolean {
+  try {
+    const parsed = new URL(urlStr);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+    const hostname = parsed.hostname.toLowerCase();
+    if (BLOCKED_HOSTNAMES.includes(hostname)) return false;
+    // Block private IP ranges
+    if (/^10\./.test(hostname)) return false;
+    if (/^172\.(1[6-9]|2\d|3[01])\./.test(hostname)) return false;
+    if (/^192\.168\./.test(hostname)) return false;
+    if (/^0\./.test(hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export interface PlaceMetadata {
   name: string;
@@ -27,13 +53,27 @@ function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Respo
   );
 }
 
+async function safeFetchText(url: string, options: RequestInit = {}): Promise<string> {
+  const res = await fetchWithTimeout(url, options);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const contentLength = res.headers.get("content-length");
+  if (contentLength && parseInt(contentLength) > MAX_RESPONSE_SIZE) {
+    throw new Error("Response too large");
+  }
+  const text = await res.text();
+  if (text.length > MAX_RESPONSE_SIZE) {
+    return text.substring(0, MAX_RESPONSE_SIZE);
+  }
+  return text;
+}
+
 export async function extractPlace(url: string): Promise<PlaceMetadata> {
   const mapsInfo = extractMapsPlaceInfo(url);
 
   // Try to extract data from the Google Maps page itself
   let html = "";
   try {
-    const res = await fetchWithTimeout(url, {
+    html = await safeFetchText(url, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -41,7 +81,6 @@ export async function extractPlace(url: string): Promise<PlaceMetadata> {
       },
       redirect: "follow",
     });
-    if (res.ok) html = await res.text();
   } catch {
     console.warn("Failed to fetch Google Maps page");
   }
@@ -96,8 +135,8 @@ export async function extractPlace(url: string): Promise<PlaceMetadata> {
     if (phoneMatch) result.phone = phoneMatch[1];
   }
 
-  // If we found a website URL, scrape it for additional context
-  if (result.websiteUrl) {
+  // If we found a website URL, scrape it for additional context (with SSRF protection)
+  if (result.websiteUrl && isSafeUrl(result.websiteUrl)) {
     try {
       result.websiteContent = await scrapeWebsite(result.websiteUrl);
     } catch (err) {
@@ -110,7 +149,7 @@ export async function extractPlace(url: string): Promise<PlaceMetadata> {
 
 async function scrapeWebsite(url: string): Promise<string | null> {
   try {
-    const res = await fetchWithTimeout(url, {
+    const html = await safeFetchText(url, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -119,9 +158,6 @@ async function scrapeWebsite(url: string): Promise<string | null> {
       redirect: "follow",
     });
 
-    if (!res.ok) return null;
-
-    const html = await res.text();
     const { document } = parseHTML(html);
 
     const reader = new Readability(document);

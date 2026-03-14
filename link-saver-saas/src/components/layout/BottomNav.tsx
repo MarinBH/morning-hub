@@ -15,7 +15,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border md:hidden">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-50 bg-surface border-t border-border md:hidden">
       <div className="flex justify-around items-center py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -24,11 +24,13 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              aria-label={item.label}
               className={`flex flex-col items-center gap-0.5 min-w-[60px] py-1 text-[10px] font-medium transition-colors ${
                 isActive ? "text-accent" : "text-muted hover:text-text-secondary"
               }`}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} aria-hidden="true" />
               <span>{item.label}</span>
             </Link>
           );

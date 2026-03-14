@@ -39,6 +39,7 @@ export default function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("");
 
@@ -56,12 +57,16 @@ export default function SearchPage() {
     }
 
     try {
+      setError("");
       const res = await fetch(`/api/links?${params}`);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Search failed");
       setResults(data.links || []);
       setTotal(data.total || 0);
-    } catch {
-      console.error("Search failed");
+    } catch (err) {
+      setError((err as Error).message);
+      setResults([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -117,7 +122,14 @@ export default function SearchPage() {
       )}
 
       <div className="px-3 pb-4 space-y-2.5">
-        {loading ? (
+        {error ? (
+          <div className="text-center py-20">
+            <p className="text-error text-sm mb-2">{error}</p>
+            <button onClick={() => doSearch(query, sectionFilter)} className="text-accent text-sm hover:text-accent-hover">
+              Try again
+            </button>
+          </div>
+        ) : loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="animate-spin text-muted" size={24} />
           </div>

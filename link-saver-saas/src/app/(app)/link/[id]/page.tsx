@@ -108,21 +108,21 @@ export default function LinkDetailPage() {
     <div className="max-w-2xl mx-auto pb-8">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-bg/80 backdrop-blur-lg">
-        <button onClick={() => router.back()} className="p-1 text-muted hover:text-text-primary">
+        <button onClick={() => router.back()} aria-label="Go back" className="p-1 text-muted hover:text-text-primary">
           <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <button onClick={toggleFavorite} className="p-1.5">
+          <button onClick={toggleFavorite} aria-label={link.is_favorite ? "Remove from favorites" : "Add to favorites"} className="p-1.5">
             {link.is_favorite ? (
               <BookmarkCheck size={20} className="text-accent" />
             ) : (
               <Bookmark size={20} className="text-muted" />
             )}
           </button>
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="p-1.5 text-muted hover:text-text-primary">
+          <a href={link.url} target="_blank" rel="noopener noreferrer" aria-label="Open original link" className="p-1.5 text-muted hover:text-text-primary">
             <ExternalLink size={20} />
           </a>
-          <button onClick={deleteLink} className="p-1.5 text-muted hover:text-error">
+          <button onClick={deleteLink} aria-label="Delete link" className="p-1.5 text-muted hover:text-error">
             <Trash2 size={20} />
           </button>
         </div>
@@ -131,7 +131,7 @@ export default function LinkDetailPage() {
       {/* Thumbnail */}
       {link.thumbnail && (
         <div className="relative">
-          <img src={link.thumbnail} alt="" className="w-full h-48 object-cover" />
+          <img src={link.thumbnail} alt={link.title} className="w-full h-48 object-cover" />
           {link.type === "youtube" && (
             <>
               <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-sm] text-[10px] font-semibold uppercase bg-red-500/85 text-white">Video</span>

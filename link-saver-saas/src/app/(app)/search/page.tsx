@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { Search as SearchIcon } from "lucide-react";
 import { KnowledgeCard } from "@/components/knowledge/KnowledgeCard";
 import { PlaceCard } from "@/components/places/PlaceCard";
+import { KnowledgeSkeleton, PlaceSkeleton } from "@/components/ui/SkeletonCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface SearchResult {
   id: string;
@@ -126,13 +128,17 @@ export default function SearchPage() {
             </button>
           </div>
         ) : loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-muted" size={22} />
-          </div>
+          <>
+            <KnowledgeSkeleton />
+            <PlaceSkeleton />
+            <KnowledgeSkeleton />
+          </>
         ) : searched && results.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted text-sm">No results found</p>
-          </div>
+          <EmptyState
+            icon={SearchIcon}
+            title={`No results for "${query}"`}
+            description="Try a different search term or adjust the filters above."
+          />
         ) : (
           results.map((r) =>
             r.section === "places" ? (

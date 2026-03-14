@@ -1,6 +1,6 @@
 {
-  "name": "Link Saver",
-  "short_name": "LinkSaver",
+  "name": "Keepmark",
+  "short_name": "Keepmark",
   "description": "Save any link. Get AI-powered summaries. Find anything instantly.",
   "start_url": "/knowledge",
   "display": "standalone",

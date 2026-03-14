@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, MapPin } from "lucide-react";
 import { PlaceCard } from "@/components/places/PlaceCard";
+import { PlaceSkeleton } from "@/components/ui/SkeletonCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface PlaceData {
   id: string;
@@ -64,10 +65,13 @@ export default function PlacesPage() {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h1 className="font-heading text-xl font-bold tracking-tight">Places</h1>
-        <Link href="/save" className="btn btn-primary btn-sm">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("open-save-modal"))}
+          className="btn btn-primary btn-sm"
+        >
           <Plus size={14} strokeWidth={2.5} />
           Save
-        </Link>
+        </button>
       </div>
 
       <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto scrollbar-none">
@@ -91,16 +95,19 @@ export default function PlacesPage() {
             </button>
           </div>
         ) : loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-muted" size={22} />
-          </div>
+          <>
+            <PlaceSkeleton />
+            <PlaceSkeleton />
+            <PlaceSkeleton />
+          </>
         ) : places.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted mb-2 text-sm">No places saved yet</p>
-            <Link href="/save" className="text-accent text-sm hover:text-accent-hover font-medium">
-              Save a Google Maps link &rarr;
-            </Link>
-          </div>
+          <EmptyState
+            icon={MapPin}
+            title="No places saved yet"
+            description="Drop a Google Maps link to save restaurants, hotels, and attractions with AI insights."
+            ctaLabel="Save a place"
+            onCtaClick={() => window.dispatchEvent(new CustomEvent("open-save-modal"))}
+          />
         ) : (
           places.map((place) => (
             <PlaceCard

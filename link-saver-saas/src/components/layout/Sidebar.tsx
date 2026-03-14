@@ -17,17 +17,17 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-56 h-dvh bg-surface/50 border-r border-border-subtle sticky top-0">
       <div className="p-4 pb-3">
-        <span className="font-display text-[15px] font-bold tracking-tight text-text-primary">Link Saver</span>
+        <span className="font-display text-[15px] font-bold tracking-tight text-text-primary">Keepmark</span>
       </div>
 
       <div className="px-3 mb-1">
-        <Link
-          href="/save"
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("open-save-modal"))}
           className="btn btn-primary btn-sm w-full"
         >
           <Plus size={15} strokeWidth={2.5} />
           Save Link
-        </Link>
+        </button>
       </div>
 
       <nav className="flex-1 px-3 pt-2">

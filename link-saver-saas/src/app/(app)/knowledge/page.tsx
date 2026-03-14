@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { KnowledgeCard } from "@/components/knowledge/KnowledgeCard";
+import { KnowledgeSkeleton } from "@/components/ui/SkeletonCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 interface LinkData {
   id: string;
@@ -78,10 +80,13 @@ export default function KnowledgePage() {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h1 className="font-heading text-xl font-bold tracking-tight">Knowledge</h1>
-        <Link href="/save" className="btn btn-primary btn-sm">
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("open-save-modal"))}
+          className="btn btn-primary btn-sm"
+        >
           <Plus size={14} strokeWidth={2.5} />
           Save
-        </Link>
+        </button>
       </div>
 
       <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto scrollbar-none">
@@ -105,16 +110,19 @@ export default function KnowledgePage() {
             </button>
           </div>
         ) : loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-muted" size={22} />
-          </div>
+          <>
+            <KnowledgeSkeleton />
+            <KnowledgeSkeleton />
+            <KnowledgeSkeleton />
+          </>
         ) : links.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-muted mb-2 text-sm">No links saved yet</p>
-            <Link href="/save" className="text-accent text-sm hover:text-accent-hover font-medium">
-              Save your first link &rarr;
-            </Link>
-          </div>
+          <EmptyState
+            icon={BookOpen}
+            title="Your knowledge base is empty"
+            description="Save an article or YouTube video to see AI-powered summaries here."
+            ctaLabel="Save your first link"
+            onCtaClick={() => window.dispatchEvent(new CustomEvent("open-save-modal"))}
+          />
         ) : (
           links.map((link) => (
             <KnowledgeCard

@@ -51,7 +51,7 @@ export function InstallPrompt() {
           <Download size={16} className="text-accent" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium font-heading mb-0.5">Install Link Saver</p>
+          <p className="text-sm font-medium font-heading mb-0.5">Install Keepmark</p>
           <p className="text-xs text-muted">Add to your home screen for quick access</p>
         </div>
         <button onClick={handleDismiss} className="p-1 text-muted hover:text-text-secondary">

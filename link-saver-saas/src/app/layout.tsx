@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Link Saver",
+  title: "Keepmark",
   description: "Save any link. Get AI-powered summaries. Find anything instantly.",
   manifest: "/manifest.json",
 };

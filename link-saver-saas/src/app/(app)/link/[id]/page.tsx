@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, ExternalLink, Bookmark, BookmarkCheck,
-  Trash2, MapPin, Clock, Star, Phone, Globe, Loader2,
+  Trash2, MapPin, Star, Phone, Globe, Loader2,
 } from "lucide-react";
+import { DetailSkeleton } from "@/components/ui/SkeletonCard";
+import { useToast } from "@/components/ui/Toast";
 
 interface LinkDetail {
   id: string;
@@ -38,6 +40,7 @@ interface LinkDetail {
 export default function LinkDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [link, setLink] = useState<LinkDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState("");
@@ -69,6 +72,7 @@ export default function LinkDetailPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_favorite: newValue }),
     });
+    toast(newValue ? "Added to favorites" : "Removed from favorites");
   }
 
   async function saveNotes() {
@@ -78,20 +82,18 @@ export default function LinkDetailPage() {
       body: JSON.stringify({ personal_notes: notes }),
     });
     setEditingNotes(false);
+    toast("Notes saved");
   }
 
   async function deleteLink() {
     if (!confirm("Delete this link?")) return;
     await fetch(`/api/links/${id}`, { method: "DELETE" });
+    toast("Link deleted");
     router.push(link?.section === "places" ? "/places" : "/knowledge");
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-muted" size={22} />
-      </div>
-    );
+    return <DetailSkeleton />;
   }
 
   if (!link) return null;

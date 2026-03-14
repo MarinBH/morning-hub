@@ -1,0 +1,10 @@
+{
+  "name": "Link Saver",
+  "short_name": "LinkSaver",
+  "description": "Save any link. Get AI-powered summaries. Find anything instantly.",
+  "start_url": "/knowledge",
+  "display": "standalone",
+  "background_color": "#0F1219",
+  "theme_color": "#0F1219",
+  "icons": []
+}

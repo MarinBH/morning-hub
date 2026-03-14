@@ -10,6 +10,12 @@ function getClient(): Anthropic {
   return client;
 }
 
+// Model selection for unit economics:
+// - Sonnet: deep analysis for knowledge content (articles, videos) — higher quality matters
+// - Haiku: place summaries — simpler structured extraction, much cheaper
+const MODEL_KNOWLEDGE = "claude-sonnet-4-20250514";
+const MODEL_PLACES = "claude-haiku-4-5-20251001";
+
 const KNOWLEDGE_SYSTEM_PROMPT = `You are a knowledge analyst creating structured summaries. Each piece of content becomes a knowledge node designed for future querying.
 
 ## Instructions
@@ -80,7 +86,7 @@ export async function summarizeKnowledge(
   }
 
   const response = await getClient().messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: MODEL_KNOWLEDGE,
     max_tokens: 4096,
     system: KNOWLEDGE_SYSTEM_PROMPT,
     tools: [KNOWLEDGE_SUMMARY_TOOL],
@@ -113,7 +119,7 @@ export async function summarizePlace(
   }
 
   const response = await getClient().messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: MODEL_PLACES,
     max_tokens: 2048,
     system: PLACE_SYSTEM_PROMPT,
     tools: [PLACE_SUMMARY_TOOL],

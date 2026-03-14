@@ -45,7 +45,6 @@ export default function SavePage() {
         throw new Error(data.error || "Failed to save link");
       }
 
-      // Mark steps as progressing
       setSteps([
         { label: `Detected: ${data.type}`, status: "done" },
         { label: "Extracting content", status: "done" },
@@ -53,7 +52,6 @@ export default function SavePage() {
         { label: "Saving to your library", status: "pending" },
       ]);
 
-      // Poll for completion
       const linkId = data.id;
       let attempts = 0;
       const maxAttempts = 30;
@@ -105,17 +103,17 @@ export default function SavePage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold tracking-tight mb-1">Save a Link</h1>
+      <h1 className="font-heading text-xl font-bold tracking-tight mb-1">Save a Link</h1>
       <p className="text-muted text-sm mb-6">Paste any URL to get an AI-powered summary</p>
 
       <form onSubmit={handleSave}>
-        <div className="relative mb-4">
-          <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" size={18} />
+        <div className="relative mb-3">
+          <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" size={16} />
           <input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-[--radius-lg] bg-surface border-2 border-dashed border-border text-text-primary text-[15px] outline-none focus:border-accent focus:border-solid transition-colors"
+            className="input pl-10 !border-dashed focus:!border-solid"
             placeholder="https://youtube.com/watch?v=..."
             disabled={processing}
             required
@@ -124,7 +122,7 @@ export default function SavePage() {
         <button
           type="submit"
           disabled={processing || !url.trim()}
-          className="w-full py-3 rounded-[--radius-md] bg-accent text-white font-medium hover:bg-accent-hover transition-colors disabled:opacity-50"
+          className="btn btn-primary btn-md w-full disabled:opacity-50"
         >
           {processing ? "Processing..." : "Save & Analyze"}
         </button>
@@ -132,16 +130,16 @@ export default function SavePage() {
 
       {error && (
         <div className="mt-4 p-3 rounded-[--radius-md] bg-error-subtle text-error text-sm flex items-center gap-2">
-          <AlertCircle size={16} />
+          <AlertCircle size={15} />
           {error}
         </div>
       )}
 
       {steps.length > 0 && (
-        <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-2.5">
           {steps.map((step, i) => (
             <div key={i} className="flex items-center gap-3">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                 step.status === "done"
                   ? "bg-success-subtle text-success"
                   : step.status === "active"
@@ -151,13 +149,13 @@ export default function SavePage() {
                   : "bg-surface text-muted"
               }`}>
                 {step.status === "done" ? (
-                  <CheckCircle2 size={14} />
+                  <CheckCircle2 size={13} />
                 ) : step.status === "active" ? (
-                  <Loader2 size={14} className="animate-spin" />
+                  <Loader2 size={13} className="animate-spin" />
                 ) : step.status === "error" ? (
-                  <AlertCircle size={14} />
+                  <AlertCircle size={13} />
                 ) : (
-                  <span className="text-xs">{i + 1}</span>
+                  <span className="text-[10px] font-mono">{i + 1}</span>
                 )}
               </div>
               <span className={`text-sm ${
@@ -173,8 +171,8 @@ export default function SavePage() {
       )}
 
       {result && (
-        <div className="mt-6 p-4 rounded-[--radius-lg] bg-success-subtle border border-success/20">
-          <p className="text-success font-medium text-sm mb-2">Link saved successfully!</p>
+        <div className="mt-6 p-4 rounded-[--radius-lg] bg-success-subtle border border-success/15">
+          <p className="text-success font-medium text-sm mb-2 font-heading">Link saved successfully!</p>
           <button
             onClick={() => router.push(`/link/${result.id}`)}
             className="text-sm text-accent hover:text-accent-hover font-medium"

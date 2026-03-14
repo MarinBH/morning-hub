@@ -54,21 +54,21 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      <h1 className="text-[22px] font-bold tracking-tight mb-6">Settings</h1>
+      <h1 className="font-heading text-xl font-bold tracking-tight mb-6">Settings</h1>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Profile */}
         <div className="p-4 rounded-[--radius-lg] bg-surface border border-border">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-              <User size={20} className="text-accent" />
+            <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center">
+              <User size={18} className="text-accent" />
             </div>
-            <div>
-              <div className="font-medium text-sm">{displayName || "User"}</div>
-              <div className="text-xs text-muted">{email}</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm font-heading truncate">{displayName || "User"}</div>
+              <div className="text-[11px] text-muted font-mono truncate">{email}</div>
             </div>
             {profile?.tier && (
-              <span className="ml-auto px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-accent/10 text-accent">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-accent/10 text-accent font-heading">
                 {profile.tier}
               </span>
             )}
@@ -76,18 +76,18 @@ export default function SettingsPage() {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-text-secondary mb-1">Display Name</label>
+              <label className="block text-xs font-medium text-text-secondary mb-1.5 font-heading">Display Name</label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-3 py-2 rounded-[--radius-md] bg-bg border border-border text-text-primary text-sm outline-none focus:border-accent"
+                className="input !bg-bg"
               />
             </div>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 rounded-[--radius-md] bg-accent text-white text-sm font-medium hover:bg-accent-hover disabled:opacity-50"
+              className="btn btn-primary btn-sm disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
@@ -96,12 +96,12 @@ export default function SettingsPage() {
 
         {/* Account */}
         <div className="p-4 rounded-[--radius-lg] bg-surface border border-border">
-          <h2 className="text-sm font-semibold mb-3">Account</h2>
+          <h2 className="text-sm font-semibold font-heading mb-3">Account</h2>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-2 px-4 py-2 rounded-[--radius-md] bg-error-subtle text-error text-sm font-medium hover:bg-error/20 transition-colors"
+            className="btn btn-sm bg-error-subtle text-error hover:bg-error/20"
           >
-            <LogOut size={16} />
+            <LogOut size={14} />
             Sign Out
           </button>
         </div>

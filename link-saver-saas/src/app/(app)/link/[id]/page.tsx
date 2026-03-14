@@ -89,7 +89,7 @@ export default function LinkDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-muted" size={24} />
+        <Loader2 className="animate-spin text-muted" size={22} />
       </div>
     );
   }
@@ -107,23 +107,23 @@ export default function LinkDetailPage() {
   return (
     <div className="max-w-2xl mx-auto pb-8">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-bg/80 backdrop-blur-lg">
-        <button onClick={() => router.back()} aria-label="Go back" className="p-1 text-muted hover:text-text-primary">
-          <ArrowLeft size={20} />
+      <div className="flex items-center justify-between px-4 py-3 sticky top-0 z-10 bg-bg/80 glass">
+        <button onClick={() => router.back()} aria-label="Go back" className="btn btn-ghost p-1.5">
+          <ArrowLeft size={18} />
         </button>
-        <div className="flex items-center gap-2">
-          <button onClick={toggleFavorite} aria-label={link.is_favorite ? "Remove from favorites" : "Add to favorites"} className="p-1.5">
+        <div className="flex items-center gap-1">
+          <button onClick={toggleFavorite} aria-label={link.is_favorite ? "Remove from favorites" : "Add to favorites"} className="btn btn-ghost p-1.5">
             {link.is_favorite ? (
-              <BookmarkCheck size={20} className="text-accent" />
+              <BookmarkCheck size={18} className="text-accent" />
             ) : (
-              <Bookmark size={20} className="text-muted" />
+              <Bookmark size={18} className="text-muted" />
             )}
           </button>
-          <a href={link.url} target="_blank" rel="noopener noreferrer" aria-label="Open original link" className="p-1.5 text-muted hover:text-text-primary">
-            <ExternalLink size={20} />
+          <a href={link.url} target="_blank" rel="noopener noreferrer" aria-label="Open original link" className="btn btn-ghost p-1.5 text-muted hover:text-text-primary">
+            <ExternalLink size={18} />
           </a>
-          <button onClick={deleteLink} aria-label="Delete link" className="p-1.5 text-muted hover:text-error">
-            <Trash2 size={20} />
+          <button onClick={deleteLink} aria-label="Delete link" className="btn btn-ghost p-1.5 text-muted hover:text-error">
+            <Trash2 size={18} />
           </button>
         </div>
       </div>
@@ -134,52 +134,52 @@ export default function LinkDetailPage() {
           <img src={link.thumbnail} alt={link.title} className="w-full h-48 object-cover" />
           {link.type === "youtube" && (
             <>
-              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-sm] text-[10px] font-semibold uppercase bg-red-500/85 text-white">Video</span>
-              {link.duration && <span className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded text-[11px] font-semibold font-mono bg-black/75 text-white">{link.duration}</span>}
+              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-xs] text-[10px] font-semibold uppercase bg-red-500/90 text-white font-heading">Video</span>
+              {link.duration && <span className="absolute bottom-2.5 right-2.5 px-1.5 py-0.5 rounded-[--radius-xs] text-[11px] font-medium font-mono bg-black/70 text-white">{link.duration}</span>}
             </>
           )}
           {isPlace && link.place_type && (
-            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-sm] text-[10px] font-semibold uppercase bg-emerald-500/85 text-white">{link.place_type}</span>
+            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-xs] text-[10px] font-semibold uppercase bg-emerald-500/90 text-white font-heading">{link.place_type}</span>
           )}
         </div>
       )}
 
       {/* Title & Meta */}
       <div className="px-4 pt-4">
-        <p className="text-[11px] font-medium text-muted uppercase tracking-wider mb-1.5">
+        <p className="section-label opacity-70 mb-1.5">
           {isPlace ? (
             <>{link.place_type || "Place"} &middot; {link.address?.split(",")[1]?.trim() || ""}</>
           ) : (
             <>{source} &middot; {link.duration || (link.reading_time ? `${link.reading_time} min` : "")} &middot; {new Date(link.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</>
           )}
         </p>
-        <h1 className="text-xl font-bold tracking-tight leading-snug mb-3">{link.title}</h1>
+        <h1 className="font-heading text-xl font-bold tracking-tight leading-snug mb-3">{link.title}</h1>
 
         {/* Place-specific: rating, address, phone */}
         {isPlace && (
           <div className="space-y-2 mb-4">
             {link.rating && (
               <div className="flex items-center gap-2">
-                <Star size={16} fill="currentColor" className="text-warning" />
-                <span className="text-base font-semibold text-warning">{link.rating}</span>
-                {link.price_level && <span className="text-sm text-muted">&middot; {link.price_level}</span>}
+                <Star size={14} fill="currentColor" className="text-warning" />
+                <span className="text-sm font-semibold text-warning">{link.rating}</span>
+                {link.price_level && <span className="text-xs text-muted">&middot; {link.price_level}</span>}
               </div>
             )}
             {link.address && (
               <div className="flex items-start gap-2 text-sm text-text-secondary">
-                <MapPin size={14} className="text-muted mt-0.5 flex-shrink-0" />
+                <MapPin size={13} className="text-muted mt-0.5 flex-shrink-0" />
                 {link.address}
               </div>
             )}
             {link.phone && (
               <div className="flex items-center gap-2 text-sm text-text-secondary">
-                <Phone size={14} className="text-muted" />
+                <Phone size={13} className="text-muted" />
                 {link.phone}
               </div>
             )}
             {link.website_url && (
-              <a href={link.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-accent">
-                <Globe size={14} />
+              <a href={link.website_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-accent hover:text-accent-hover">
+                <Globe size={13} />
                 {new URL(link.website_url).hostname}
               </a>
             )}
@@ -190,7 +190,7 @@ export default function LinkDetailPage() {
         {topicTags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {topicTags.map(t => (
-              <span key={t.name} className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-accent/10 text-accent">
+              <span key={t.name} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/8 text-accent/80 font-heading">
                 {t.name}
               </span>
             ))}
@@ -199,7 +199,7 @@ export default function LinkDetailPage() {
 
         {/* Author description */}
         {summary?.author_description && (
-          <p className="text-[13px] text-muted mb-4 italic">
+          <p className="text-[13px] text-muted mb-4 italic leading-relaxed">
             {summary.author_description}
           </p>
         )}
@@ -208,7 +208,7 @@ export default function LinkDetailPage() {
       {/* Processing state */}
       {link.status === "processing" && (
         <div className="px-4 py-8 text-center">
-          <Loader2 className="animate-spin text-accent mx-auto mb-2" size={24} />
+          <Loader2 className="animate-spin text-accent mx-auto mb-2" size={22} />
           <p className="text-sm text-muted">AI summary is being generated...</p>
         </div>
       )}
@@ -219,8 +219,8 @@ export default function LinkDetailPage() {
           {/* TLDR */}
           {summary.tldr && (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">TLDR</h2>
-              <div className="p-3 rounded-[--radius-md] bg-accent/8 border-l-3 border-accent text-[15px] font-medium leading-relaxed">
+              <h2 className="section-label mb-2">TLDR</h2>
+              <div className="p-3 rounded-[--radius-md] bg-accent/6 border-l-[3px] border-accent text-[14px] font-medium leading-relaxed">
                 {summary.tldr}
               </div>
             </div>
@@ -229,11 +229,11 @@ export default function LinkDetailPage() {
           {/* Key Takeaways */}
           {(summary.key_takeaways)?.length ? (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Key Takeaways</h2>
+              <h2 className="section-label mb-2">Key Takeaways</h2>
               <ul className="space-y-0">
                 {(summary.key_takeaways).map((t: string, i: number) => (
-                  <li key={i} className="py-2 pl-5 relative text-[14px] text-text-secondary leading-relaxed border-b border-border last:border-0">
-                    <span className="absolute left-0 top-3.5 w-2 h-2 rounded-full bg-accent/50" />
+                  <li key={i} className="py-2 pl-4 relative text-[13px] text-text-secondary leading-relaxed border-b border-border-subtle last:border-0">
+                    <span className="absolute left-0 top-3.5 w-1.5 h-1.5 rounded-full bg-accent/40" />
                     {t}
                   </li>
                 ))}
@@ -244,11 +244,11 @@ export default function LinkDetailPage() {
           {/* Key Highlights (places) */}
           {(summary.key_highlights)?.length ? (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Key Highlights</h2>
+              <h2 className="section-label mb-2">Key Highlights</h2>
               <ul className="space-y-0">
                 {(summary.key_highlights).map((h: string, i: number) => (
-                  <li key={i} className="py-2 pl-5 relative text-[14px] text-text-secondary leading-relaxed border-b border-border last:border-0">
-                    <span className="absolute left-0 top-3.5 w-2 h-2 rounded-full bg-accent/50" />
+                  <li key={i} className="py-2 pl-4 relative text-[13px] text-text-secondary leading-relaxed border-b border-border-subtle last:border-0">
+                    <span className="absolute left-0 top-3.5 w-1.5 h-1.5 rounded-full bg-accent/40" />
                     {h}
                   </li>
                 ))}
@@ -259,11 +259,11 @@ export default function LinkDetailPage() {
           {/* Actions */}
           {(summary.actions)?.length ? (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Actions</h2>
-              <div className="space-y-2">
+              <h2 className="section-label mb-2">Actions</h2>
+              <div className="space-y-1.5">
                 {(summary.actions).map((a: { action: string; rationale: string }, i: number) => (
-                  <div key={i} className="p-3 bg-surface rounded-[--radius-md] border-l-3 border-success">
-                    <div className="text-[13px] font-semibold mb-0.5">{a.action}</div>
+                  <div key={i} className="p-3 bg-surface rounded-[--radius-md] border-l-[3px] border-success">
+                    <div className="text-[13px] font-semibold font-heading mb-0.5">{a.action}</div>
                     <div className="text-[12px] text-muted leading-snug">{a.rationale}</div>
                   </div>
                 ))}
@@ -274,10 +274,10 @@ export default function LinkDetailPage() {
           {/* Insider Tips (places) */}
           {(summary.insider_tips)?.length ? (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Insider Tips</h2>
-              <div className="space-y-2">
+              <h2 className="section-label mb-2">Insider Tips</h2>
+              <div className="space-y-1.5">
                 {(summary.insider_tips).map((tip: string, i: number) => (
-                  <div key={i} className="p-3 bg-surface rounded-[--radius-md] border-l-3 border-success text-[13px] text-text-secondary">
+                  <div key={i} className="p-3 bg-surface rounded-[--radius-md] border-l-[3px] border-success text-[13px] text-text-secondary">
                     {tip}
                   </div>
                 ))}
@@ -288,18 +288,18 @@ export default function LinkDetailPage() {
           {/* Core Thesis */}
           {summary.core_thesis && (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Core Thesis</h2>
-              <p className="text-[14px] text-text-secondary leading-relaxed">{summary.core_thesis}</p>
+              <h2 className="section-label mb-2">Core Thesis</h2>
+              <p className="text-[13px] text-text-secondary leading-relaxed">{summary.core_thesis}</p>
             </div>
           )}
 
           {/* Concepts */}
           {conceptTags.length > 0 && (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Concepts</h2>
+              <h2 className="section-label mb-2">Concepts</h2>
               <div className="flex flex-wrap gap-1.5">
                 {conceptTags.map(c => (
-                  <span key={c.name} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-surface text-muted border border-border">
+                  <span key={c.name} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-surface text-muted border border-border font-heading">
                     {c.name}
                   </span>
                 ))}
@@ -310,10 +310,10 @@ export default function LinkDetailPage() {
           {/* Best For (places) */}
           {(summary.best_for)?.length ? (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Best For</h2>
+              <h2 className="section-label mb-2">Best For</h2>
               <div className="flex flex-wrap gap-1.5">
                 {(summary.best_for).map((b: string) => (
-                  <span key={b} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-surface text-muted border border-border">
+                  <span key={b} className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-surface text-muted border border-border font-heading">
                     {b}
                   </span>
                 ))}
@@ -324,11 +324,11 @@ export default function LinkDetailPage() {
           {/* Goals */}
           {link.link_goals?.length > 0 && (
             <div className="px-4 mb-5">
-              <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Goals</h2>
-              <div className="space-y-2">
+              <h2 className="section-label mb-2">Goals</h2>
+              <div className="space-y-1.5">
                 {link.link_goals.map((g: { goal: string; relevance: string }, i: number) => (
                   <div key={i} className="p-3 bg-surface rounded-[--radius-md] text-[13px]">
-                    <span className="font-medium">{g.goal}</span>
+                    <span className="font-medium font-heading">{g.goal}</span>
                     <span className="text-muted"> — {g.relevance}</span>
                   </div>
                 ))}
@@ -345,18 +345,18 @@ export default function LinkDetailPage() {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[--radius-md] bg-accent text-white text-sm font-medium"
+            className="btn btn-primary btn-sm flex-1"
           >
-            <MapPin size={16} /> Open in Maps
+            <MapPin size={14} /> Open in Maps
           </a>
           {link.website_url && (
             <a
               href={link.website_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[--radius-md] bg-surface border border-border text-text-primary text-sm font-medium"
+              className="btn btn-secondary btn-sm flex-1"
             >
-              <Globe size={16} /> Visit Website
+              <Globe size={14} /> Visit Website
             </a>
           )}
         </div>
@@ -364,25 +364,25 @@ export default function LinkDetailPage() {
 
       {/* Personal Notes */}
       <div className="px-4 mb-5">
-        <h2 className="text-[12px] font-semibold text-accent uppercase tracking-wider mb-2">Your Notes</h2>
+        <h2 className="section-label mb-2">Your Notes</h2>
         {editingNotes ? (
           <div>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full p-3 rounded-[--radius-md] bg-surface border border-border text-text-primary text-[13px] outline-none focus:border-accent resize-y min-h-[80px]"
+              className="input resize-y min-h-[80px] text-[13px]"
               placeholder="Add a personal note..."
               autoFocus
             />
             <div className="flex gap-2 mt-2">
-              <button onClick={saveNotes} className="px-3 py-1.5 rounded-[--radius-sm] bg-accent text-white text-xs font-medium">Save</button>
-              <button onClick={() => { setEditingNotes(false); setNotes(link.personal_notes || ""); }} className="px-3 py-1.5 rounded-[--radius-sm] bg-surface text-muted text-xs font-medium border border-border">Cancel</button>
+              <button onClick={saveNotes} className="btn btn-primary btn-sm text-xs">Save</button>
+              <button onClick={() => { setEditingNotes(false); setNotes(link.personal_notes || ""); }} className="btn btn-secondary btn-sm text-xs">Cancel</button>
             </div>
           </div>
         ) : (
           <button
             onClick={() => setEditingNotes(true)}
-            className="w-full p-3 rounded-[--radius-md] bg-surface border border-dashed border-border text-muted text-[13px] text-center hover:border-accent/40 transition-colors"
+            className="w-full p-3 rounded-[--radius-md] bg-surface border border-dashed border-border text-muted text-[13px] text-center hover:border-accent/30 transition-colors"
           >
             {notes || "Tap to add a personal note..."}
           </button>

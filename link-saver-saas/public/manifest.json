@@ -4,7 +4,23 @@
   "description": "Save any link. Get AI-powered summaries. Find anything instantly.",
   "start_url": "/knowledge",
   "display": "standalone",
-  "background_color": "#0F1219",
-  "theme_color": "#0F1219",
-  "icons": []
+  "background_color": "#0A0E1A",
+  "theme_color": "#0A0E1A",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false
 }

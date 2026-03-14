@@ -32,7 +32,7 @@ export function PlaceCard({
 
   return (
     <Link href={`/link/${id}`} className="block">
-      <div className="bg-surface rounded-[--radius-lg] border border-border overflow-hidden hover:border-accent/40 hover:shadow-lg hover:shadow-black/20 transition-all">
+      <div className="bg-surface rounded-[--radius-lg] border border-border overflow-hidden card-hover">
         {thumbnail && (
           <div className="relative">
             <img
@@ -42,7 +42,7 @@ export function PlaceCard({
               loading="lazy"
             />
             {placeType && (
-              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-sm] text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/85 text-white">
+              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-[--radius-xs] text-[10px] font-semibold uppercase tracking-wider bg-emerald-500/90 text-white font-heading">
                 {placeType}
               </span>
             )}
@@ -50,27 +50,27 @@ export function PlaceCard({
         )}
         <div className="p-3.5">
           {!thumbnail && placeType && (
-            <span className="inline-block mb-1.5 text-[11px] font-medium text-muted uppercase tracking-wider">
+            <span className="section-label opacity-70 block mb-1.5">
               {placeType}
             </span>
           )}
-          <h3 className="text-[15px] font-semibold leading-snug mb-2">{title}</h3>
+          <h3 className="text-[15px] font-semibold font-heading leading-snug mb-2">{title}</h3>
 
           <div className="flex items-center gap-2 mb-2">
             {rating && (
               <span className="flex items-center gap-1 text-[13px] font-semibold text-warning">
-                <Star size={13} fill="currentColor" />
+                <Star size={12} fill="currentColor" />
                 {rating}
               </span>
             )}
             {priceLevel && (
-              <span className="text-[12px] text-muted">&middot; {priceLevel}</span>
+              <span className="text-[11px] text-muted">&middot; {priceLevel}</span>
             )}
           </div>
 
           {address && (
-            <div className="flex items-start gap-1.5 mb-2 text-[13px] text-text-secondary">
-              <MapPin size={14} className="text-muted flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-1.5 mb-2 text-[12px] text-text-secondary">
+              <MapPin size={12} className="text-muted flex-shrink-0 mt-0.5" />
               <span className="line-clamp-1">{address}</span>
             </div>
           )}
@@ -84,14 +84,14 @@ export function PlaceCard({
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2">
               {tags.slice(0, 3).map((t) => (
-                <span key={t.name} className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-accent/10 text-accent">
+                <span key={t.name} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/8 text-accent/80 font-heading">
                   {t.name}
                 </span>
               ))}
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-[11px] font-mono text-muted">
+          <div className="flex items-center gap-1.5 text-[11px] font-mono text-muted">
             <Clock size={10} />
             <span>{dateLabel}</span>
           </div>

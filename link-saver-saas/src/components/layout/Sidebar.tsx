@@ -15,22 +15,22 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col w-56 h-dvh bg-surface border-r border-border sticky top-0">
-      <div className="p-4 border-b border-border">
-        <h1 className="text-lg font-bold tracking-tight">Link Saver</h1>
+    <aside className="hidden md:flex flex-col w-56 h-dvh bg-surface/50 border-r border-border-subtle sticky top-0">
+      <div className="p-4 pb-3">
+        <span className="font-display text-[15px] font-bold tracking-tight text-text-primary">Link Saver</span>
       </div>
 
-      <div className="p-3">
+      <div className="px-3 mb-1">
         <Link
           href="/save"
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[--radius-md] bg-accent text-white font-medium text-sm hover:bg-accent-hover transition-colors"
+          className="btn btn-primary btn-sm w-full"
         >
-          <Plus size={16} />
+          <Plus size={15} strokeWidth={2.5} />
           Save Link
         </Link>
       </div>
 
-      <nav className="flex-1 px-3">
+      <nav className="flex-1 px-3 pt-2">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -38,13 +38,13 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-[--radius-sm] text-sm font-medium mb-0.5 transition-colors ${
+              className={`flex items-center gap-2.5 px-2.5 py-[7px] rounded-[--radius-sm] text-[13px] font-medium font-heading mb-px transition-colors ${
                 isActive
                   ? "bg-accent-subtle text-accent"
                   : "text-muted hover:text-text-secondary hover:bg-surface-hover"
               }`}
             >
-              <Icon size={18} />
+              <Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} />
               {item.label}
             </Link>
           );

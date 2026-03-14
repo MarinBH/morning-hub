@@ -88,54 +88,50 @@ export default function SearchPage() {
     <div className="max-w-2xl mx-auto">
       <div className="px-4 pt-4 pb-2">
         <form onSubmit={handleSubmit} className="relative">
-          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" size={18} />
+          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" size={16} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-[--radius-lg] bg-surface border border-border text-text-primary text-[15px] outline-none focus:border-accent transition-colors"
+            className="input pl-10"
             placeholder="Search by title, tag, or content..."
           />
         </form>
       </div>
 
       <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto scrollbar-none">
-        {SECTION_CHIPS.map((chip) => (
+        {SECTION_CHIPS.map((c) => (
           <button
-            key={chip.value}
-            onClick={() => handleFilterChange(chip.value)}
-            className={`px-3.5 py-1.5 rounded-full text-[12px] font-medium whitespace-nowrap border transition-colors ${
-              sectionFilter === chip.value
-                ? "bg-accent/10 text-accent border-accent"
-                : "bg-surface text-muted border-border hover:text-text-secondary"
-            }`}
+            key={c.value}
+            onClick={() => handleFilterChange(c.value)}
+            className={`chip ${sectionFilter === c.value ? "chip-active" : ""}`}
           >
-            {chip.label}
+            {c.label}
           </button>
         ))}
       </div>
 
       {searched && (
-        <div className="px-4 pb-2 text-[12px] text-muted">
+        <div className="px-4 pb-2 text-[11px] text-muted font-mono">
           {loading ? "Searching..." : `${total} result${total !== 1 ? "s" : ""}`}
         </div>
       )}
 
-      <div className="px-3 pb-4 space-y-2.5">
+      <div className="px-3 pb-4 space-y-2">
         {error ? (
           <div className="text-center py-20">
             <p className="text-error text-sm mb-2">{error}</p>
-            <button onClick={() => doSearch(query, sectionFilter)} className="text-accent text-sm hover:text-accent-hover">
+            <button onClick={() => doSearch(query, sectionFilter)} className="text-accent text-sm hover:text-accent-hover font-medium">
               Try again
             </button>
           </div>
         ) : loading ? (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="animate-spin text-muted" size={24} />
+            <Loader2 className="animate-spin text-muted" size={22} />
           </div>
         ) : searched && results.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-muted">No results found</p>
+            <p className="text-muted text-sm">No results found</p>
           </div>
         ) : (
           results.map((r) =>

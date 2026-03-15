@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, ExternalLink, Bookmark, BookmarkCheck,
-  Trash2, MapPin, Star, Phone, Globe, Loader2,
+  Trash2, MapPin, Star, Phone, Globe, Loader2, X, Plus,
 } from "lucide-react";
 import { DetailSkeleton } from "@/components/ui/SkeletonCard";
 import { useToast } from "@/components/ui/Toast";
@@ -33,7 +33,7 @@ interface LinkDetail {
   personal_notes: string | null;
   is_favorite: boolean;
   created_at: string;
-  link_tags: Array<{ tags: { name: string; tag_type: string } }>;
+  link_tags: Array<{ tag_id: string; tags: { id: string; name: string; tag_type: string } }>;
   link_goals: Array<{ goal: string; relevance: string }>;
 }
 
@@ -45,6 +45,10 @@ export default function LinkDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notes, setNotes] = useState("");
   const [editingNotes, setEditingNotes] = useState(false);
+  const [newTag, setNewTag] = useState("");
+  const [addingTag, setAddingTag] = useState(false);
+  const [showTagInput, setShowTagInput] = useState(false);
+  const [allTags, setAllTags] = useState<Array<{ id: string; name: string }>>([]);
 
   useEffect(() => {
     async function fetchLink() {
@@ -90,6 +94,46 @@ export default function LinkDetailPage() {
     await fetch(`/api/links/${id}`, { method: "DELETE" });
     toast("Link deleted");
     router.push(link?.section === "places" ? "/places" : "/knowledge");
+  }
+
+  async function fetchUserTags() {
+    const res = await fetch("/api/tags");
+    if (res.ok) {
+      const data = await res.json();
+      setAllTags(data);
+    }
+  }
+
+  async function addTag() {
+    if (!newTag.trim() || addingTag) return;
+    setAddingTag(true);
+    try {
+      const res = await fetch(`/api/links/${id}/tags`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newTag.trim() }),
+      });
+      if (res.ok) {
+        const tag = await res.json();
+        setLink(prev => prev ? {
+          ...prev,
+          link_tags: [...prev.link_tags, { tag_id: tag.id, tags: tag }],
+        } : prev);
+        setNewTag("");
+        toast(`Tag "${tag.name}" added`);
+      }
+    } finally {
+      setAddingTag(false);
+    }
+  }
+
+  async function removeTag(tagId: string, tagName: string) {
+    await fetch(`/api/links/${id}/tags?tagId=${tagId}`, { method: "DELETE" });
+    setLink(prev => prev ? {
+      ...prev,
+      link_tags: prev.link_tags.filter(lt => lt.tag_id !== tagId),
+    } : prev);
+    toast(`Tag "${tagName}" removed`);
   }
 
   if (loading) {
@@ -188,16 +232,56 @@ export default function LinkDetailPage() {
           </div>
         )}
 
-        {/* Tags */}
-        {topicTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {topicTags.map(t => (
-              <span key={t.name} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/8 text-accent/80 font-heading">
-                {t.name}
-              </span>
-            ))}
-          </div>
-        )}
+        {/* Tags (editable) */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {tags.map(t => (
+            <span key={t.name} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent/8 text-accent/80 font-heading group">
+              {t.name}
+              <button
+                onClick={() => {
+                  const lt = link.link_tags.find(lt => lt.tags?.name === t.name);
+                  if (lt) removeTag(lt.tag_id, t.name);
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                aria-label={`Remove tag ${t.name}`}
+              >
+                <X size={10} />
+              </button>
+            </span>
+          ))}
+          {showTagInput ? (
+            <form
+              onSubmit={(e) => { e.preventDefault(); addTag(); }}
+              className="inline-flex items-center gap-1"
+            >
+              <input
+                type="text"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onFocus={fetchUserTags}
+                onBlur={() => { if (!newTag.trim()) setTimeout(() => setShowTagInput(false), 200); }}
+                className="w-24 px-2 py-0.5 rounded-full text-[11px] bg-surface border border-border focus:border-accent/40 outline-none font-heading"
+                placeholder="Add tag..."
+                autoFocus
+                list="tag-suggestions"
+              />
+              <datalist id="tag-suggestions">
+                {allTags
+                  .filter(t => !tags.some(existing => existing.name === t.name))
+                  .map(t => <option key={t.id} value={t.name} />)
+                }
+              </datalist>
+            </form>
+          ) : (
+            <button
+              onClick={() => setShowTagInput(true)}
+              className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium border border-dashed border-border text-muted hover:border-accent/30 hover:text-accent/60 font-heading transition-colors"
+            >
+              <Plus size={10} />
+              Add tag
+            </button>
+          )}
+        </div>
 
         {/* Author description */}
         {summary?.author_description && (

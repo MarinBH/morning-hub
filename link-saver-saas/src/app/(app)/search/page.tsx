@@ -41,17 +41,21 @@ export default function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [searched, setSearched] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
-  const doSearch = useCallback(async (searchQuery: string, section: string) => {
+  const doSearch = useCallback(async (searchQuery: string, section: string, pageNum: number, append = false) => {
     if (!searchQuery.trim()) return;
 
-    setLoading(true);
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
     setSearched(true);
 
-    const params = new URLSearchParams({ search: searchQuery.trim() });
+    const params = new URLSearchParams({ search: searchQuery.trim(), page: String(pageNum), limit: "20" });
     if (section === "knowledge" || section === "places") {
       params.set("section", section);
     } else if (section === "article" || section === "youtube") {
@@ -63,26 +67,31 @@ export default function SearchPage() {
       const res = await fetch(`/api/links?${params}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Search failed");
-      setResults(data.links || []);
+      setResults(prev => append ? [...prev, ...(data.links || [])] : (data.links || []));
       setTotal(data.total || 0);
+      setHasMore(data.hasMore || false);
+      setPage(pageNum);
     } catch (err) {
       setError((err as Error).message);
-      setResults([]);
-      setTotal(0);
+      if (!append) {
+        setResults([]);
+        setTotal(0);
+      }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    doSearch(query, sectionFilter);
+    doSearch(query, sectionFilter, 1);
   }
 
   function handleFilterChange(value: string) {
     setSectionFilter(value);
     if (query.trim()) {
-      doSearch(query, value);
+      doSearch(query, value, 1);
     }
   }
 
@@ -123,7 +132,7 @@ export default function SearchPage() {
         {error ? (
           <div className="text-center py-20">
             <p className="text-error text-sm mb-2">{error}</p>
-            <button onClick={() => doSearch(query, sectionFilter)} className="text-accent text-sm hover:text-accent-hover font-medium">
+            <button onClick={() => doSearch(query, sectionFilter, 1)} className="text-accent text-sm hover:text-accent-hover font-medium">
               Try again
             </button>
           </div>
@@ -140,40 +149,51 @@ export default function SearchPage() {
             description="Try a different search term or adjust the filters above."
           />
         ) : (
-          results.map((r) =>
-            r.section === "places" ? (
-              <PlaceCard
-                key={r.id}
-                id={r.id}
-                title={r.title}
-                summaryPreview={r.summary_preview}
-                address={r.address}
-                rating={r.rating}
-                priceLevel={r.price_level}
-                placeType={r.place_type}
-                thumbnail={r.thumbnail}
-                tags={r.link_tags?.map(lt => lt.tags).filter(Boolean) || []}
-                createdAt={r.created_at}
-              />
-            ) : (
-              <KnowledgeCard
-                key={r.id}
-                id={r.id}
-                title={r.title}
-                type={r.type as "article" | "youtube"}
-                summaryPreview={r.summary_preview}
-                author={r.author}
-                channel={r.channel}
-                siteName={r.site_name}
-                thumbnail={r.thumbnail}
-                readingTime={r.reading_time}
-                duration={r.duration}
-                isFavorite={r.is_favorite}
-                tags={r.link_tags?.map(lt => lt.tags).filter(Boolean) || []}
-                createdAt={r.created_at}
-              />
-            )
-          )
+          <>
+            {results.map((r) =>
+              r.section === "places" ? (
+                <PlaceCard
+                  key={r.id}
+                  id={r.id}
+                  title={r.title}
+                  summaryPreview={r.summary_preview}
+                  address={r.address}
+                  rating={r.rating}
+                  priceLevel={r.price_level}
+                  placeType={r.place_type}
+                  thumbnail={r.thumbnail}
+                  tags={r.link_tags?.map(lt => lt.tags).filter(Boolean) || []}
+                  createdAt={r.created_at}
+                />
+              ) : (
+                <KnowledgeCard
+                  key={r.id}
+                  id={r.id}
+                  title={r.title}
+                  type={r.type as "article" | "youtube"}
+                  summaryPreview={r.summary_preview}
+                  author={r.author}
+                  channel={r.channel}
+                  siteName={r.site_name}
+                  thumbnail={r.thumbnail}
+                  readingTime={r.reading_time}
+                  duration={r.duration}
+                  isFavorite={r.is_favorite}
+                  tags={r.link_tags?.map(lt => lt.tags).filter(Boolean) || []}
+                  createdAt={r.created_at}
+                />
+              )
+            )}
+            {hasMore && (
+              <button
+                onClick={() => doSearch(query, sectionFilter, page + 1, true)}
+                disabled={loadingMore}
+                className="btn btn-secondary btn-sm w-full mt-2 disabled:opacity-50"
+              >
+                {loadingMore ? "Loading..." : "Load more"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

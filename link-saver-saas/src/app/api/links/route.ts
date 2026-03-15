@@ -35,8 +35,11 @@ export async function GET(request: Request) {
     .select("*, link_tags(tag_id, tags(id, name, tag_type))", { count: "exact" })
     .eq("user_id", user.id);
 
+  const placeType = searchParams.get("place_type") || undefined;
+
   if (section) query = query.eq("section", section);
   if (type) query = query.eq("type", type);
+  if (placeType) query = query.eq("place_type", placeType);
   if (favorite === "true") query = query.eq("is_favorite", true);
 
   if (search) {

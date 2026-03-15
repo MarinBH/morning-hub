@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, ExternalLink, Bookmark, BookmarkCheck,
-  Trash2, MapPin, Star, Phone, Globe, Loader2, X, Plus,
+  Trash2, MapPin, Star, Phone, Globe, Loader2, X, Plus, Share2,
 } from "lucide-react";
 import { DetailSkeleton } from "@/components/ui/SkeletonCard";
 import { useToast } from "@/components/ui/Toast";
@@ -32,6 +32,7 @@ interface LinkDetail {
   ai_summary: Record<string, unknown> | null;
   personal_notes: string | null;
   is_favorite: boolean;
+  is_public: boolean;
   created_at: string;
   link_tags: Array<{ tag_id: string; tags: { id: string; name: string; tag_type: string } }>;
   link_goals: Array<{ goal: string; relevance: string }>;
@@ -87,6 +88,24 @@ export default function LinkDetailPage() {
     });
     setEditingNotes(false);
     toast("Notes saved");
+  }
+
+  async function toggleShare() {
+    if (!link) return;
+    const newValue = !link.is_public;
+    setLink({ ...link, is_public: newValue });
+    await fetch(`/api/links/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_public: newValue }),
+    });
+    if (newValue) {
+      const shareUrl = `${window.location.origin}/shared/${id}`;
+      await navigator.clipboard.writeText(shareUrl);
+      toast("Share link copied to clipboard");
+    } else {
+      toast("Link is now private");
+    }
   }
 
   async function deleteLink() {
@@ -164,6 +183,9 @@ export default function LinkDetailPage() {
             ) : (
               <Bookmark size={18} className="text-muted" />
             )}
+          </button>
+          <button onClick={toggleShare} aria-label={link.is_public ? "Make private" : "Share link"} className={`btn btn-ghost p-1.5 ${link.is_public ? "text-accent" : "text-muted hover:text-text-primary"}`}>
+            <Share2 size={18} />
           </button>
           <a href={link.url} target="_blank" rel="noopener noreferrer" aria-label="Open original link" className="btn btn-ghost p-1.5 text-muted hover:text-text-primary">
             <ExternalLink size={18} />

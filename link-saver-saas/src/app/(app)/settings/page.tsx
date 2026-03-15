@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, User, Download, Trash2, ChevronDown } from "lucide-react";
+import { LogOut, User, Download, Trash2, ChevronDown, Palette, BookmarkPlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/Toast";
 
@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [defaultSort, setDefaultSort] = useState("newest");
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [palette, setPalette] = useState("navy");
   const router = useRouter();
   const supabase = createClient();
   const { toast } = useToast();
@@ -33,6 +34,7 @@ export default function SettingsPage() {
         setProfile(data);
         setDisplayName(data.display_name || "");
         setDefaultSort(data.preferences?.default_sort || "newest");
+        setPalette(data.preferences?.palette || "navy");
       }
     }
     load();
@@ -47,9 +49,18 @@ export default function SettingsPage() {
       .from("profiles")
       .update({
         display_name: displayName,
-        preferences: { ...profile?.preferences, default_sort: defaultSort },
+        preferences: { ...profile?.preferences, default_sort: defaultSort, palette },
       })
       .eq("id", user.id);
+
+    // Apply palette immediately and persist for instant load
+    if (palette === "navy") {
+      document.documentElement.removeAttribute("data-palette");
+      localStorage.removeItem("keepmark-palette");
+    } else {
+      document.documentElement.setAttribute("data-palette", palette);
+      localStorage.setItem("keepmark-palette", palette);
+    }
 
     setSaving(false);
     toast("Settings saved");
@@ -161,6 +172,57 @@ export default function SettingsPage() {
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
+        </div>
+
+        {/* Appearance */}
+        <div className="p-4 rounded-[--radius-lg] bg-surface border border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <Palette size={14} className="text-accent" />
+            <h2 className="text-sm font-semibold font-heading">Appearance</h2>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { id: "navy", label: "Navy", bg: "#0A0E1A", accent: "#4F8EFF" },
+              { id: "charcoal", label: "Charcoal", bg: "#1C1917", accent: "#D4A574" },
+              { id: "purple", label: "Purple", bg: "#13111C", accent: "#8B6CC1" },
+            ].map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setPalette(p.id)}
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-[--radius-md] border transition-colors ${
+                  palette === p.id
+                    ? "border-accent bg-accent/8"
+                    : "border-border hover:border-border"
+                }`}
+              >
+                <div className="flex gap-1">
+                  <div className="w-5 h-5 rounded-full border border-white/10" style={{ background: p.bg }} />
+                  <div className="w-5 h-5 rounded-full border border-white/10" style={{ background: p.accent }} />
+                </div>
+                <span className="text-[11px] font-heading font-medium">{p.label}</span>
+              </button>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted mt-2">Click &quot;Save Changes&quot; above to apply.</p>
+        </div>
+
+        {/* Quick Save Bookmarklet */}
+        <div className="p-4 rounded-[--radius-lg] bg-surface border border-border">
+          <div className="flex items-center gap-2 mb-3">
+            <BookmarkPlus size={14} className="text-accent" />
+            <h2 className="text-sm font-semibold font-heading">Quick Save Bookmarklet</h2>
+          </div>
+          <p className="text-[12px] text-text-secondary mb-3">Drag this button to your bookmarks bar. Click it on any page to save the link to Keepmark.</p>
+          <a
+            href={`javascript:void(window.open('${typeof window !== "undefined" ? window.location.origin : ""}/api/save?url='+encodeURIComponent(window.location.href),'_blank','width=500,height=400'))`}
+            onClick={(e) => e.preventDefault()}
+            onDragStart={() => {}}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[--radius-md] bg-accent text-white text-[12px] font-semibold font-heading cursor-grab active:cursor-grabbing shadow-md"
+          >
+            <BookmarkPlus size={13} />
+            Save to Keepmark
+          </a>
+          <p className="text-[11px] text-muted mt-2">Or right-click → &quot;Bookmark This Link&quot; to add manually.</p>
         </div>
 
         {/* Data */}

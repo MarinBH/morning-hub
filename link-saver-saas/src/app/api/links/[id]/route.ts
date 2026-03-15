@@ -66,6 +66,12 @@ export async function PATCH(
     }
     updates.title = body.title;
   }
+  if ("is_public" in body) {
+    if (typeof body.is_public !== "boolean") {
+      return NextResponse.json({ error: "is_public must be a boolean" }, { status: 400 });
+    }
+    updates.is_public = body.is_public;
+  }
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });

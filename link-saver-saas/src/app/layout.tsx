@@ -30,6 +30,11 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased min-h-dvh">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{const p=localStorage.getItem('keepmark-palette');if(p&&p!=='navy')document.documentElement.setAttribute('data-palette',p)}catch(e){}`,
+          }}
+        />
         {children}
       </body>
     </html>

@@ -2,7 +2,7 @@
   "name": "Keepmark",
   "short_name": "Keepmark",
   "description": "Save any link. Get AI-powered summaries. Find anything instantly.",
-  "start_url": "/knowledge",
+  "start_url": "/home",
   "display": "standalone",
   "background_color": "#0A0E1A",
   "theme_color": "#0A0E1A",

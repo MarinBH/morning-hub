@@ -266,3 +266,49 @@ body {
 .backdrop-enter {
   animation: fade-in 200ms ease-out;
 }
+
+/* ═══════════════════════════════════════════════════════
+   Theme Palettes
+   ═══════════════════════════════════════════════════════ */
+
+/* Palette: Warm Charcoal */
+[data-palette="charcoal"] {
+  --color-bg: #1C1917;
+  --color-surface: #292524;
+  --color-surface-hover: #342E2A;
+  --color-border: #3D3530;
+  --color-border-subtle: #332D28;
+  --color-accent: #D4A574;
+  --color-accent-hover: #E0B98E;
+  --color-accent-subtle: rgba(212,165,116,0.12);
+  --color-accent-glow: rgba(212,165,116,0.06);
+  --color-text-primary: #F5F5F4;
+  --color-text-secondary: #D6D3D1;
+  --color-muted: #A8A29E;
+  --color-success: #86EFAC;
+  --color-success-subtle: rgba(134,239,172,0.12);
+  --color-error: #FCA5A5;
+  --color-error-subtle: rgba(252,165,165,0.12);
+  --color-warning: #FCD34D;
+}
+
+/* Palette: Deep Purple */
+[data-palette="purple"] {
+  --color-bg: #13111C;
+  --color-surface: #1E1D2B;
+  --color-surface-hover: #282738;
+  --color-border: #332F48;
+  --color-border-subtle: #2A2740;
+  --color-accent: #8B6CC1;
+  --color-accent-hover: #A185D4;
+  --color-accent-subtle: rgba(139,108,193,0.12);
+  --color-accent-glow: rgba(139,108,193,0.06);
+  --color-text-primary: #F0EDE6;
+  --color-text-secondary: #CBC6BE;
+  --color-muted: #8E8C99;
+  --color-success: #6EE7B7;
+  --color-success-subtle: rgba(110,231,183,0.12);
+  --color-error: #FB7185;
+  --color-error-subtle: rgba(251,113,133,0.12);
+  --color-warning: #FDE68A;
+}
